@@ -40,8 +40,10 @@ const AnnotationPage: React.FC = () => {
   const audioCount = annotations.filter(a => a.role === 'audio').length;
   const byCharCounts: Record<string, number> = {};
   annotations.forEach(a => {
-    const node = project.nodes[a.dialogueId];
-    if (node) byCharCounts[node.role] = (byCharCounts[node.role] || 0) + 1;
+    a.dialogueIds.forEach(did => {
+      const node = project.nodes[did];
+      if (node) byCharCounts[node.role] = (byCharCounts[node.role] || 0) + 1;
+    });
   });
 
   const filteredAnnotations = useMemo(() => {
@@ -49,8 +51,10 @@ const AnnotationPage: React.FC = () => {
     if (filter === 'director') list = list.filter(a => a.role === 'director');
     else if (filter === 'audio') list = list.filter(a => a.role === 'audio');
     else if (filter !== 'all') list = list.filter(a => {
-      const node = project.nodes[a.dialogueId];
-      return node?.role === filter;
+      return a.dialogueIds.some(did => {
+        const node = project.nodes[did];
+        return node?.role === filter;
+      });
     });
     return list;
   }, [annotations, filter, project.nodes]);
@@ -298,7 +302,6 @@ const AnnotationPage: React.FC = () => {
           <AnnotationCard
             key={ann.id}
             annotation={ann}
-            dialogue={project.nodes[ann.dialogueId]}
           />
         ))
       )}

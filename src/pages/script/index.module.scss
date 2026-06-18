@@ -722,3 +722,34 @@
   display: flex;
   flex: 1;
 }
+
+/* ========== 视图切换 ========== */
+.viewTabs {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+}
+
+.viewTab {
+  @include button-reset;
+  flex: 1;
+  height: 72rpx;
+  border-radius: $radius-button;
+  background: $color-bg-card;
+  border: 2rpx solid $color-border;
+  color: $color-text-tertiary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.activeViewTab {
+  background: rgba(123, 58, 237, 0.15);
+  border-color: $color-primary;
+  color: $color-primary-light;
+  box-shadow: 0 0 16rpx rgba(123, 58, 237, 0.2);
+}

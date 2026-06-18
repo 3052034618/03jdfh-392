@@ -1,0 +1,246 @@
+@use '@/styles/variables.scss' as *;
+
+.wrapper {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  border: 2rpx solid $color-border;
+  padding: $spacing-md;
+  overflow-x: auto;
+}
+
+.statusBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-sm $spacing-md;
+  margin-bottom: $spacing-md;
+  background: rgba(123, 58, 237, 0.06);
+  border-radius: $radius-md;
+}
+
+.statusLeft {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.statusItem {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  font-size: 22rpx;
+  color: $color-text-secondary;
+
+  &.broken {
+    color: $emotion-scream;
+  }
+
+  &.ok {
+    color: $emotion-normal;
+  }
+}
+
+.statusNum {
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.tip {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+}
+
+.treeContainer {
+  position: relative;
+  padding: $spacing-sm;
+}
+
+.treeNode {
+  position: relative;
+  padding: $spacing-sm 0 $spacing-sm $spacing-sm;
+  margin-bottom: $spacing-xs;
+}
+
+.nodeContent {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  border: 2rpx solid transparent;
+  transition: all $transition-fast;
+
+  &:active {
+    transform: scale(0.995);
+    border-color: $color-primary;
+  }
+}
+
+.activeContent {
+  background: rgba(123, 58, 237, 0.1);
+  border-color: $color-primary;
+  box-shadow: 0 0 12rpx rgba(123, 58, 237, 0.2);
+}
+
+.brokenContent {
+  border-color: rgba(255, 59, 92, 0.4);
+  background: rgba(255, 59, 92, 0.06);
+}
+
+.nodeLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  min-width: 120rpx;
+  flex-shrink: 0;
+}
+
+.nodeId {
+  font-size: 22rpx;
+  font-weight: $font-weight-semibold;
+  color: $color-primary-light;
+}
+
+.nodeChar {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+}
+
+.nodeRight {
+  flex: 1;
+  min-width: 0;
+}
+
+.nodeText {
+  font-size: 22rpx;
+  color: $color-text-secondary;
+  line-height: 1.5;
+  @include text-ellipsis-multi(2);
+}
+
+.nodeTags {
+  display: flex;
+  gap: 6rpx;
+  margin-top: 6rpx;
+  flex-wrap: wrap;
+}
+
+.branchIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 2rpx 10rpx;
+  background: rgba(255, 200, 87, 0.1);
+  color: $emotion-close;
+  font-size: 18rpx;
+  border-radius: $radius-round;
+  margin-left: auto;
+}
+
+.endIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 2rpx 10rpx;
+  background: rgba(47, 212, 166, 0.1);
+  color: $emotion-normal;
+  font-size: 18rpx;
+  border-radius: $radius-round;
+  margin-left: auto;
+}
+
+.brokenIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 2rpx 10rpx;
+  background: rgba(255, 59, 92, 0.1);
+  color: $emotion-scream;
+  font-size: 18rpx;
+  border-radius: $radius-round;
+  margin-left: auto;
+  animation: blink 1.5s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.children {
+  margin-left: 48rpx;
+  padding-left: $spacing-md;
+  border-left: 2rpx dashed $color-border;
+  position: relative;
+  margin-top: 4rpx;
+}
+
+.childBranch {
+  position: relative;
+  margin-bottom: $spacing-sm;
+
+  &::before {
+    content: '';
+    position: absolute;
+    left: -$spacing-md - 2rpx;
+    top: 32rpx;
+    width: $spacing-sm;
+    height: 2rpx;
+    background: $color-border;
+  }
+}
+
+.branchLabel {
+  position: absolute;
+  left: -$spacing-md - 4rpx;
+  top: 0;
+  transform: translateX(-100%);
+  font-size: 18rpx;
+  padding: 4rpx 10rpx;
+  background: rgba(123, 58, 237, 0.12);
+  color: $color-primary-light;
+  border-radius: $radius-round;
+  white-space: nowrap;
+  max-width: 200rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.linearLabel {
+  position: absolute;
+  left: -$spacing-md - 4rpx;
+  top: 16rpx;
+  transform: translateX(-100%);
+  font-size: 16rpx;
+  color: $color-text-tertiary;
+}
+
+.legend {
+  display: flex;
+  gap: $spacing-md;
+  padding: $spacing-sm $spacing-md;
+  margin-top: $spacing-sm;
+  border-top: 2rpx dashed $color-border;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+}
+
+.legendDot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: $radius-round;
+}
+
+.empty {
+  padding: $spacing-xl;
+  text-align: center;
+  color: $color-text-tertiary;
+  font-size: 24rpx;
+}

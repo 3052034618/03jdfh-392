@@ -20,7 +20,7 @@ export interface BranchChoice {
 
 export interface Annotation {
   id: string;
-  dialogueId: string;
+  dialogueIds: string[];      // 支持关联多句台词
   content: string;
   author: string;
   role: string;
@@ -39,12 +39,6 @@ export interface DialogueNode {
   recorded?: boolean;
   duration?: number;
   lastRecordedAt?: number;
-}
-
-export interface PersistState {
-  project: ScriptProject;
-  currentCharacterId: string;
-  rehearsalNodeId: string;
 }
 
 export interface Character {
@@ -69,4 +63,41 @@ export interface EmotionPoint {
   value: number;
   label: string;
   type: PerformanceType;
+}
+
+// 排练轨迹：演员从开头走到结尾的一次完整记录
+export interface RehearsalTrack {
+  id: string;
+  title: string;
+  startedAt: number;
+  endedAt: number;
+  actorName: string;
+  // 按顺序经过的节点 ID
+  pathNodeIds: string[];
+  // 做出的分支选择 { nodeId: choiceId }
+  choices: Record<string, string>;
+  // 录制完成的节点 ID 列表
+  recordedNodeIds: string[];
+  // 本次路径的情绪曲线快照
+  emotionCurve: EmotionPoint[];
+  // 备注
+  note?: string;
+}
+
+// 树状总览节点
+export interface TreeNode {
+  id: string;
+  node: DialogueNode;
+  level: number;
+  children: TreeNode[];
+  hasBrokenLink: boolean;  // 断链（nextNodeId/choice.nextNodeId 指向不存在的节点）
+  isEnd: boolean;          // 路径终点
+}
+
+export interface PersistState {
+  project: ScriptProject;
+  currentCharacterId: string;
+  rehearsalNodeId: string;
+  rehearsalTracks: RehearsalTrack[];
+  annotations: Annotation[];   // 全局批注列表（去重存储）
 }

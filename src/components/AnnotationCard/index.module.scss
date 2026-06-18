@@ -11,6 +11,107 @@
   &:active {
     transform: scale(0.995);
   }
+
+  &.expanded {
+    border-color: $color-primary;
+    box-shadow: 0 0 16rpx rgba(123, 58, 237, 0.2);
+  }
+}
+
+.arrow {
+  font-size: 28rpx;
+  color: $color-text-tertiary;
+  transition: transform $transition-base;
+  flex-shrink: 0;
+  margin-left: $spacing-sm;
+}
+
+.expandedArrow {
+  transform: rotate(180deg);
+  color: $color-primary-light;
+}
+
+.linkBadge {
+  padding: 2rpx 12rpx;
+  background: rgba(123, 58, 237, 0.1);
+  border-radius: $radius-round;
+  border: 2rpx solid rgba(123, 58, 237, 0.2);
+
+  &_text {
+    font-size: 18rpx;
+    color: $color-primary-light;
+  }
+}
+
+.linkedSection {
+  margin-bottom: $spacing-md;
+  padding: $spacing-md;
+  background: rgba(47, 212, 166, 0.04);
+  border-radius: $radius-md;
+  border-left: 4rpx solid $emotion-normal;
+}
+
+.linkedTitle {
+  font-size: 22rpx;
+  color: $emotion-normal;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-sm;
+}
+
+.linkedList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.linkedItem {
+  display: flex;
+  gap: $spacing-sm;
+  align-items: flex-start;
+}
+
+.linkedIdx {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: $radius-round;
+  background: rgba(123, 58, 237, 0.12);
+  color: $color-primary-light;
+  font-size: 20rpx;
+  font-weight: $font-weight-semibold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.linkedContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.linkedMeta {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: 4rpx;
+}
+
+.linkedId {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  font-weight: $font-weight-medium;
+}
+
+.linkedChar {
+  font-size: 20rpx;
+  font-weight: $font-weight-medium;
+}
+
+.linkedText {
+  font-size: 22rpx;
+  color: $color-text-secondary;
+  line-height: 1.5;
+  @include text-ellipsis-multi(3);
 }
 
 .header {

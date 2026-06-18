@@ -1,0 +1,156 @@
+@use '@/styles/variables.scss' as *;
+
+.mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: flex-end;
+  z-index: 300;
+  animation: fadeIn $transition-base;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.sheet {
+  width: 100%;
+  max-height: 85vh;
+  background: $color-bg-card;
+  border-top-left-radius: $radius-xl;
+  border-top-right-radius: $radius-xl;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp $transition-base;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.header {
+  padding: $spacing-lg $spacing-lg $spacing-md;
+  border-bottom: 2rpx solid $color-border;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.closeBtn {
+  @include button-reset;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-round;
+  background: $color-bg-hover;
+  color: $color-text-tertiary;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tabs {
+  display: flex;
+  padding: $spacing-md $spacing-lg;
+  gap: $spacing-sm;
+  border-bottom: 2rpx solid $color-border;
+  flex-shrink: 0;
+}
+
+.tab {
+  @include button-reset;
+  padding: $spacing-sm $spacing-lg;
+  border-radius: $radius-button;
+  background: $color-bg-hover;
+  border: 2rpx solid $color-border;
+  color: $color-text-tertiary;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  transition: all $transition-fast;
+
+  &.active {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+    border-color: transparent;
+    color: $color-text-white;
+    box-shadow: 0 4rpx 12rpx rgba(123, 58, 237, 0.3);
+  }
+}
+
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: $spacing-lg;
+}
+
+.previewBox {
+  background: $color-bg-page;
+  border-radius: $radius-md;
+  border: 2rpx solid $color-border;
+  padding: $spacing-lg;
+  min-height: 400rpx;
+}
+
+.previewText {
+  font-size: 22rpx;
+  color: $color-text-secondary;
+  line-height: 1.8;
+  font-family: 'Consolas', 'Menlo', monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.footer {
+  padding: $spacing-md $spacing-lg $spacing-lg;
+  border-top: 2rpx solid $color-border;
+  display: flex;
+  gap: $spacing-sm;
+  flex-shrink: 0;
+}
+
+.secBtn {
+  @include button-reset;
+  flex: 1;
+  height: 80rpx;
+  border-radius: $radius-button;
+  background: $color-bg-hover;
+  border: 2rpx solid $color-border;
+  color: $color-text-secondary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    border-color: $color-primary;
+    color: $color-primary-light;
+    background: rgba(123, 58, 237, 0.06);
+  }
+}
+
+.primaryBtn {
+  @include button-reset;
+  flex: 2;
+  height: 80rpx;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  border: none;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  box-shadow: 0 4rpx 16rpx rgba(123, 58, 237, 0.3);
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}

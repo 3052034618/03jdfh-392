@@ -7,11 +7,13 @@ import { useDialogue } from '@/store/DialogueContext';
 import { DialogueNode as NodeType, PerformanceHint, PerformanceType, BranchChoice } from '@/types/dialogue';
 import DialogueNode from '@/components/DialogueNode';
 import PerformanceTag from '@/components/PerformanceTag';
+import DialogueTree from '@/components/DialogueTree';
+import ExportPanel from '@/components/ExportPanel';
 import { performanceOptions } from '@/data/mockScript';
 
 type AttachMode = 'none' | 'linear' | 'choice';
-type EditorPanel = 'none' | 'add' | 'edit';
 type EditMode = 'text' | 'perf' | 'branch';
+type ViewMode = 'list' | 'tree';
 
 const ScriptPage: React.FC = () => {
   const {
@@ -28,7 +30,7 @@ const ScriptPage: React.FC = () => {
     createNode
   } = useDialogue();
 
-  // 选中的节点（用于编辑）
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [editMode, setEditMode] = useState<EditMode>('text');
 
@@ -49,6 +51,8 @@ const ScriptPage: React.FC = () => {
     choiceId?: string;
   }>(null);
 
+  const [showExport, setShowExport] = useState(false);
+
   const character = project.characters.find(c => c.id === currentCharacterId);
   const filteredNodes = useMemo(
     () => nodesList.filter(n => n.role === currentCharacterId),
@@ -59,7 +63,6 @@ const ScriptPage: React.FC = () => {
   const branchCount = allNodesOfRole.filter(n => n.choices && n.choices.length > 0).length;
   const selectedNode: NodeType | null = selectedNodeId ? (project.nodes[selectedNodeId] || null) : null;
 
-  // 切换角色
   const switchCharacter = (id: string) => {
     setCurrentCharacterId(id);
     setSelectedNodeId(null);
@@ -94,7 +97,6 @@ const ScriptPage: React.FC = () => {
       choiceText: attachMode === 'choice' ? attachChoiceText.trim() : undefined
     });
     Taro.showToast({ title: '对白已添加', icon: 'success' });
-    // 重置
     setNewText('');
     setNewIntensity(5);
     setAttachMode('none');
@@ -112,9 +114,25 @@ const ScriptPage: React.FC = () => {
   const handleNodeClick = (n: NodeType) => {
     setSelectedNodeId(n.id);
     setEditMode('text');
+    if (viewMode === 'tree') {
+      // 切到列表视图方便编辑
+      setTimeout(() => {
+        Taro.pageScrollTo && Taro.pageScrollTo({ scrollTop: 0, duration: 300 });
+      }, 100);
+    }
   };
 
-  // 选择表演提示（编辑已有节点）
+  // 从树节点点击跳转
+  const handleTreeNodeClick = (nodeId: string) => {
+    setSelectedNodeId(nodeId);
+    setEditMode('text');
+    setViewMode('list');
+    Taro.showToast({ title: '已跳转到编辑区', icon: 'success', duration: 1000 });
+    setTimeout(() => {
+      Taro.pageScrollTo && Taro.pageScrollTo({ scrollTop: 0, duration: 300 });
+    }, 300);
+  };
+
   const selectPerformance = (type: PerformanceType, label: string) => {
     if (!selectedNodeId) return;
     const perf: PerformanceHint = {
@@ -133,7 +151,6 @@ const ScriptPage: React.FC = () => {
     }
   };
 
-  // 处理目标选择弹窗（选择某句对白 ID）
   const pickTargetNode = (nodeId: string) => {
     if (!targetPicker) return;
     const ctx = targetPicker.context;
@@ -158,7 +175,12 @@ const ScriptPage: React.FC = () => {
     <ScrollView className={styles.page} scrollY>
       {/* 顶部项目信息 */}
       <View className={styles.header}>
-        <Text className={styles.projectTitle}>{project.title}</Text>
+        <View style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Text className={styles.projectTitle}>{project.title}</Text>
+          <Button className={styles.ghostBtn} onClick={() => setShowExport(true)}>
+            📤 导出
+          </Button>
+        </View>
         <View className={styles.projectMeta}>
           <View className={styles.metaItem}>
             <View className={styles.metaDot}></View>
@@ -210,6 +232,20 @@ const ScriptPage: React.FC = () => {
             </View>
           ))}
         </ScrollView>
+      </View>
+
+      {/* 视图切换：列表 / 树状 */}
+      <View className={styles.section}>
+        <View className={styles.viewTabs}>
+          <Button
+            className={classnames(styles.viewTab, viewMode === 'list' && styles.activeViewTab)}
+            onClick={() => setViewMode('list')}
+          >📜 列表视图</Button>
+          <Button
+            className={classnames(styles.viewTab, viewMode === 'tree' && styles.activeViewTab)}
+            onClick={() => setViewMode('tree')}
+          >🌳 对白树总览</Button>
+        </View>
       </View>
 
       {/* ===== 新增对白表单 ===== */}
@@ -507,38 +543,50 @@ const ScriptPage: React.FC = () => {
         </View>
       )}
 
-      {/* 对白列表 */}
-      <View className={styles.section}>
-        <View className={styles.nodesTitle}>
-          <Text className={styles.sectionText}>📜 对白列表（{filteredNodes.length}条）</Text>
-          <Button className={styles.ghostBtn}>筛选</Button>
-        </View>
-        {filteredNodes.length === 0 ? (
-          <View className={styles.editorCard}>
-            <Text style={{ color: '#6E6E8A', fontSize: '26rpx' }}>
-              该角色暂无对白段落，点击右上角"+ 新增对白"开始创作
-            </Text>
+      {/* ===== 视图内容 ===== */}
+      {viewMode === 'tree' ? (
+        <View className={styles.section}>
+          <View className={styles.nodesTitle}>
+            <Text className={styles.sectionText}>🌳 对白树总览</Text>
           </View>
-        ) : (
-          filteredNodes.map(node => (
-            <DialogueNode
-              key={node.id}
-              node={node}
-              active={selectedNodeId === node.id}
-              onClick={() => handleNodeClick(node)}
-            />
-          ))
-        )}
-      </View>
+          <DialogueTree
+            activeNodeId={selectedNodeId || undefined}
+            onNodeClick={handleTreeNodeClick}
+          />
+        </View>
+      ) : (
+        <View className={styles.section}>
+          <View className={styles.nodesTitle}>
+            <Text className={styles.sectionText}>📜 对白列表（{filteredNodes.length}条）</Text>
+            <Button className={styles.ghostBtn}>筛选</Button>
+          </View>
+          {filteredNodes.length === 0 ? (
+            <View className={styles.editorCard}>
+              <Text style={{ color: '#6E6E8A', fontSize: '26rpx' }}>
+                该角色暂无对白段落，点击右上角"+ 新增对白"开始创作
+              </Text>
+            </View>
+          ) : (
+            filteredNodes.map(node => (
+              <DialogueNode
+                key={node.id}
+                node={node}
+                active={selectedNodeId === node.id}
+                onClick={() => handleNodeClick(node)}
+              />
+            ))
+          )}
+        </View>
+      )}
 
       {/* 悬浮新增按钮 */}
-      {!showAddPanel && (
+      {!showAddPanel && viewMode === 'list' && (
         <View className={styles.fab} onClick={() => setShowAddPanel(true)}>
           <Text className={styles.fabIcon}>+</Text>
         </View>
       )}
 
-      {/* 目标节点选择弹窗（底部 sheet） */}
+      {/* 目标节点选择弹窗 */}
       {targetPicker && (
         <View className={styles.modalMask} onClick={() => setTargetPicker(null)}>
           <View className={styles.modalSheet} onClick={e => e.stopPropagation()}>
@@ -596,6 +644,9 @@ const ScriptPage: React.FC = () => {
           </View>
         </View>
       )}
+
+      {/* 导出面板 */}
+      <ExportPanel visible={showExport} onClose={() => setShowExport(false)} />
     </ScrollView>
   );
 };

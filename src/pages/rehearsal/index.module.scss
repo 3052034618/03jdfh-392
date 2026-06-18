@@ -421,3 +421,273 @@
   box-shadow: 0 4rpx 16rpx rgba(123, 58, 237, 0.3);
   margin-top: $spacing-sm;
 }
+
+/* ========== 模式切换 ========== */
+.modeTabs {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+}
+
+.modeTab {
+  @include button-reset;
+  flex: 1;
+  height: 80rpx;
+  border-radius: $radius-button;
+  background: $color-bg-card;
+  border: 2rpx solid $color-border;
+  color: $color-text-tertiary;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.activeModeTab {
+  background: rgba(123, 58, 237, 0.15);
+  border-color: $color-primary;
+  color: $color-primary-light;
+  box-shadow: 0 0 16rpx rgba(123, 58, 237, 0.2);
+}
+
+/* ========== 轨迹列表 ========== */
+.tracksHeader {
+  margin-bottom: $spacing-lg;
+}
+
+.tracksTitle {
+  display: block;
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+  font-weight: $font-weight-bold;
+  margin-bottom: $spacing-xs;
+}
+
+.tracksSub {
+  display: block;
+  font-size: 22rpx;
+  color: $color-text-tertiary;
+  line-height: 1.5;
+}
+
+.emptyTracks {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  border: 2rpx dashed $color-border;
+  padding: $spacing-xl * 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-md;
+  text-align: center;
+}
+
+.emptyTracksIcon {
+  font-size: 80rpx;
+  opacity: 0.4;
+}
+
+.emptyTracksTitle {
+  font-size: $font-size-lg;
+  color: $color-text-secondary;
+  font-weight: $font-weight-semibold;
+}
+
+.emptyTracksText {
+  font-size: 24rpx;
+  color: $color-text-tertiary;
+  line-height: 1.6;
+}
+
+/* ========== 终点保存 ========== */
+.endBlock {
+  background: rgba(47, 212, 166, 0.08);
+  border: 2rpx solid rgba(47, 212, 166, 0.3);
+  border-radius: $radius-lg;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  text-align: center;
+}
+
+.endHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.endIcon {
+  font-size: 40rpx;
+}
+
+.endTitle {
+  font-size: $font-size-lg;
+  color: #2FD4A6;
+  font-weight: $font-weight-bold;
+}
+
+.endText {
+  display: block;
+  font-size: 24rpx;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-lg;
+}
+
+.saveTrackBtn {
+  @include button-reset;
+  width: 100%;
+  height: 88rpx;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, #2FD4A6 0%, #1FA57E 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  box-shadow: 0 4rpx 16rpx rgba(47, 212, 166, 0.3);
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+}
+
+/* ========== 弹窗表单 ========== */
+.modalMask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 200;
+}
+
+.modalSheet {
+  width: 100%;
+  background: $color-bg-card;
+  border-top-left-radius: $radius-lg;
+  border-top-right-radius: $radius-lg;
+  padding: $spacing-lg $spacing-lg;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.modalTitle {
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.closeBtn {
+  @include button-reset;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-round;
+  background: $color-bg-hover;
+  color: $color-text-tertiary;
+  font-size: 28rpx;
+
+  &:active {
+    background: $color-border;
+  }
+}
+
+.modalList {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.formGroup {
+  margin-bottom: $spacing-lg;
+}
+
+.formLabel {
+  display: block;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-xs;
+}
+
+.formInput {
+  width: 100%;
+  height: 80rpx;
+  padding: 0 $spacing-md;
+  background: $color-bg-input;
+  border-radius: $radius-md;
+  border: 2rpx solid $color-border;
+  color: $color-text-primary;
+  font-size: $font-size-md;
+  box-sizing: border-box;
+
+  &:focus {
+    border-color: $color-primary;
+  }
+}
+
+.trackSummary {
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.summaryTitle {
+  display: block;
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-sm;
+}
+
+.summaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-xs 0;
+}
+
+.summaryLabel {
+  font-size: 24rpx;
+  color: $color-text-tertiary;
+}
+
+.summaryValue {
+  font-size: 24rpx;
+  color: $color-primary-light;
+  font-weight: $font-weight-semibold;
+}
+
+.primaryBtn {
+  @include button-reset;
+  width: 100%;
+  height: 88rpx;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  box-shadow: 0 4rpx 16rpx rgba(123, 58, 237, 0.3);
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+
+  &.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    box-shadow: none;
+  }
+}

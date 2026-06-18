@@ -1,0 +1,248 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  border: 2rpx solid $color-border;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.995);
+    border-color: rgba(123, 58, 237, 0.3);
+  }
+}
+
+.expanded {
+  border-color: $color-primary;
+  box-shadow: 0 0 16rpx rgba(123, 58, 237, 0.2);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.title {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-top: 4rpx;
+}
+
+.metaItem {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.metaDot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: $radius-round;
+  background: $color-primary;
+}
+
+.badges {
+  display: flex;
+  gap: $spacing-xs;
+}
+
+.badge {
+  padding: 4rpx 14rpx;
+  border-radius: $radius-round;
+  font-size: 18rpx;
+  font-weight: $font-weight-medium;
+}
+
+.recordedBadge {
+  background: rgba(47, 212, 166, 0.12);
+  color: $emotion-normal;
+  border: 2rpx solid rgba(47, 212, 166, 0.3);
+}
+
+.pathBadge {
+  background: rgba(123, 58, 237, 0.12);
+  color: $color-primary-light;
+  border: 2rpx solid rgba(123, 58, 237, 0.3);
+}
+
+.avgBadge {
+  background: rgba(255, 200, 87, 0.12);
+  color: $emotion-close;
+  border: 2rpx solid rgba(255, 200, 87, 0.3);
+}
+
+.arrow {
+  font-size: 28rpx;
+  color: $color-text-tertiary;
+  transition: transform $transition-base;
+}
+
+.expanded .arrow {
+  transform: rotate(180deg);
+  color: $color-primary-light;
+}
+
+.body {
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 2rpx dashed $color-border;
+}
+
+.sectionTitle {
+  font-size: 22rpx;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-sm;
+  font-weight: $font-weight-medium;
+}
+
+.pathFlow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6rpx;
+  margin-bottom: $spacing-md;
+  align-items: center;
+}
+
+.nodeChip {
+  padding: 4rpx 14rpx;
+  background: $color-bg-hover;
+  border-radius: $radius-round;
+  font-size: 20rpx;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+
+  &.recorded {
+    background: rgba(47, 212, 166, 0.12);
+    color: $emotion-normal;
+    border: 2rpx solid rgba(47, 212, 166, 0.25);
+  }
+
+  &.choice {
+    background: rgba(123, 58, 237, 0.12);
+    color: $color-primary-light;
+    font-size: 18rpx;
+  }
+}
+
+.flowArrow {
+  color: $color-text-tertiary;
+  font-size: 18rpx;
+}
+
+.choicesList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+}
+
+.choiceItem {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-xs $spacing-md;
+  background: $color-bg-hover;
+  border-radius: $radius-sm;
+}
+
+.choiceKey {
+  font-size: 22rpx;
+  color: $color-primary-light;
+  font-weight: $font-weight-semibold;
+  min-width: 60rpx;
+}
+
+.choiceText {
+  flex: 1;
+  font-size: 22rpx;
+  color: $color-text-secondary;
+  @include text-ellipsis;
+}
+
+.choiceTarget {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+}
+
+.note {
+  padding: $spacing-sm $spacing-md;
+  background: rgba(255, 200, 87, 0.06);
+  border-left: 4rpx solid $emotion-close;
+  border-radius: $radius-sm;
+  margin-bottom: $spacing-md;
+
+  &_text {
+    font-size: 22rpx;
+    color: $color-text-secondary;
+    line-height: 1.6;
+  }
+}
+
+.actions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+}
+
+.actionBtn {
+  @include button-reset;
+  flex: 1;
+  height: 72rpx;
+  border-radius: $radius-md;
+  background: $color-bg-hover;
+  border: 2rpx solid $color-border;
+  color: $color-text-secondary;
+  font-size: $font-size-xs;
+  transition: all $transition-base;
+
+  &:active {
+    border-color: $color-primary;
+    color: $color-primary-light;
+    background: rgba(123, 58, 237, 0.06);
+  }
+
+  &.primary {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+    border: none;
+    color: $color-text-white;
+  }
+
+  &.danger {
+    color: $emotion-scream;
+    border-color: rgba(255, 59, 92, 0.3);
+
+    &:active {
+      background: rgba(255, 59, 92, 0.06);
+      border-color: $emotion-scream;
+    }
+  }
+}
+
+.chartBox {
+  margin-bottom: $spacing-md;
+}
+
+.emptyNote {
+  font-size: 22rpx;
+  color: $color-text-tertiary;
+  font-style: italic;
+}
