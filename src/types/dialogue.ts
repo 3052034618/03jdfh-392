@@ -82,6 +82,17 @@ export interface RehearsalTrack {
   emotionCurve: EmotionPoint[];
   // 备注
   note?: string;
+  // 评审结论
+  review?: TrackReview;
+}
+
+// 轨迹评审结论
+export interface TrackReview {
+  recommended: boolean;        // 是否推荐用于正式录制
+  reason: string;              // 采用理由
+  reviewedAt: number;          // 评审时间
+  reviewerName: string;        // 评审人（通常是导演）
+  comparedWithId?: string;     // 对比的另一条轨迹 ID
 }
 
 // 树状总览节点

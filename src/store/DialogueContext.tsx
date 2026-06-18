@@ -11,7 +11,8 @@ import {
   PerformanceType,
   RehearsalTrack,
   TreeNode,
-  EmotionPoint
+  EmotionPoint,
+  TrackReview
 } from '@/types/dialogue';
 import { mockScriptProject, mockAnnotations } from '@/data/mockScript';
 
@@ -254,6 +255,7 @@ interface DialogueContextType {
   }) => string;
   deleteRehearsalTrack: (trackId: string) => void;
   loadRehearsalTrack: (trackId: string) => RehearsalTrack | undefined;
+  setTrackReview: (trackId: string, review: TrackReview) => void;
 
   // 树状总览
   getTreeData: () => { trees: TreeNode[]; brokenLinks: string[]; allNodes: Set<string>; confluenceNodes: string[]; orphanNodes: string[] };
@@ -614,6 +616,12 @@ export const DialogueProvider: React.FC<{ children: ReactNode }> = ({ children }
     return rehearsalTracks.find(t => t.id === trackId);
   }, [rehearsalTracks]);
 
+  const setTrackReview = useCallback((trackId: string, review: TrackReview) => {
+    setRehearsalTracks(prev => prev.map(t =>
+      t.id === trackId ? { ...t, review } : t
+    ));
+  }, []);
+
   const getTreeData = useCallback(() => buildTree(project), [project]);
 
   const exportAllAsText = useCallback((): string => {
@@ -733,6 +741,7 @@ export const DialogueProvider: React.FC<{ children: ReactNode }> = ({ children }
     saveRehearsalTrack,
     deleteRehearsalTrack,
     loadRehearsalTrack,
+    setTrackReview,
     getTreeData,
     exportAllAsText,
     getCharacterById,

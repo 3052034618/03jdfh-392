@@ -293,3 +293,45 @@
     color: #C874FF;
   }
 }
+
+.recBadge {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #1a1a2e;
+  font-size: 18rpx;
+  font-weight: $font-weight-bold;
+  padding: 4rpx 14rpx;
+  border-radius: $radius-round;
+  flex-shrink: 0;
+}
+
+.reviewBox {
+  background: $color-bg-input;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  border: 2rpx solid $color-border;
+
+  &.recReview {
+    background: rgba(255, 215, 0, 0.08);
+    border-color: rgba(255, 215, 0, 0.4);
+  }
+}
+
+.reviewTitle {
+  font-size: 26rpx;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.reviewReason {
+  font-size: 24rpx;
+  color: $color-text-secondary;
+  line-height: 1.6;
+  margin-bottom: $spacing-xs;
+}
+
+.reviewMeta {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  font-style: italic;
+}

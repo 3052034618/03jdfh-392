@@ -73,7 +73,12 @@ const TrackCard: React.FC<Props> = ({
     )}>
       <View className={styles.header} onClick={() => setExpanded(!expanded)}>
         <View className={styles.main}>
-          <Text className={styles.title}>{track.title}</Text>
+          <View style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+            <Text className={styles.title}>{track.title}</Text>
+            {track.review?.recommended && (
+              <View className={styles.recBadge}>⭐ 推荐</View>
+            )}
+          </View>
           <View className={styles.meta}>
             <View className={styles.metaItem}>
               <View className={styles.metaDot}></View>
@@ -178,6 +183,24 @@ const TrackCard: React.FC<Props> = ({
               <Text className={styles.sectionTitle}>📝 备注</Text>
               <View className={styles.note}>
                 <Text className={styles.note_text}>{track.note}</Text>
+              </View>
+            </>
+          )}
+
+          {track.review && (
+            <>
+              <Text className={styles.sectionTitle}>🎯 评审结论</Text>
+              <View className={classnames(styles.reviewBox, track.review.recommended && styles.recReview)}>
+                <View style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                  {track.review.recommended && <Text style={{ fontSize: 28 }}>⭐</Text>}
+                  <Text className={styles.reviewTitle}>
+                    {track.review.recommended ? '推荐用于正式录制' : '评审记录'}
+                  </Text>
+                </View>
+                <Text className={styles.reviewReason}>{track.review.reason}</Text>
+                <Text className={styles.reviewMeta}>
+                  —— {track.review.reviewerName} · {new Date(track.review.reviewedAt).toLocaleString('zh-CN')}
+                </Text>
               </View>
             </>
           )}

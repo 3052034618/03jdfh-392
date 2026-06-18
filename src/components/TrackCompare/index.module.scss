@@ -343,3 +343,291 @@
   color: $color-text-tertiary;
   flex-shrink: 0;
 }
+
+.recommended {
+  border-color: #FFD700 !important;
+  box-shadow: 0 0 16rpx rgba(255, 215, 0, 0.3);
+}
+
+.recBadge {
+  position: absolute;
+  top: -12rpx;
+  right: -12rpx;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #1a1a2e;
+  font-size: 20rpx;
+  font-weight: $font-weight-bold;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-round;
+  z-index: 2;
+}
+
+.diffTag {
+  &.same {
+    background: rgba(47, 212, 166, 0.1);
+    color: #2FD4A6;
+  }
+  &.onlyA {
+    background: rgba(74, 144, 255, 0.15);
+    color: #4A90FF;
+  }
+  &.onlyB {
+    background: rgba(181, 151, 255, 0.15);
+    color: #B597FF;
+  }
+  &.bothDiff {
+    background: rgba(255, 149, 59, 0.15);
+    color: #FF953B;
+  }
+  &.recA {
+    background: rgba(74, 144, 255, 0.1);
+    color: #4A90FF;
+  }
+  &.recB {
+    background: rgba(181, 151, 255, 0.1);
+    color: #B597FF;
+  }
+}
+
+.emptyBox {
+  padding: 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $color-bg-input;
+  border-radius: $radius-md;
+}
+
+.branchList {
+  max-height: 600rpx;
+}
+
+.branchItem {
+  background: $color-bg-input;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-sm;
+  border: 2rpx solid $color-border;
+  transition: all $transition-fast;
+
+  &.branchDiff {
+    border-color: rgba(255, 59, 92, 0.5);
+    background: rgba(255, 59, 92, 0.05);
+  }
+}
+
+.branchHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-xs;
+}
+
+.branchIdx {
+  font-size: 24rpx;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.branchFrom {
+  font-size: 22rpx;
+  color: $color-text-secondary;
+  margin-bottom: $spacing-sm;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.branchCompare {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+}
+
+.branchSideA,
+.branchSideB {
+  flex: 1;
+  min-width: 0;
+  padding: $spacing-sm;
+  border-radius: $radius-sm;
+}
+
+.branchSideA {
+  background: rgba(74, 144, 255, 0.1);
+  border: 2rpx solid rgba(74, 144, 255, 0.2);
+}
+
+.branchSideB {
+  background: rgba(181, 151, 255, 0.1);
+  border: 2rpx solid rgba(181, 151, 255, 0.2);
+}
+
+.choiceText {
+  font-size: 24rpx;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.choiceNext {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+}
+
+.filterBar {
+  display: flex;
+  gap: $spacing-sm;
+  margin: $spacing-sm 0 $spacing-md;
+  padding: $spacing-xs;
+  background: $color-bg-input;
+  border-radius: $radius-sm;
+}
+
+.filterChip {
+  flex: 1;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  color: $color-text-secondary;
+  border-radius: $radius-sm;
+  transition: all $transition-fast;
+
+  &.activeChip {
+    background: $color-primary;
+    color: $color-text-white;
+    font-weight: $font-weight-semibold;
+  }
+}
+
+.branchTag {
+  background: rgba(255, 149, 59, 0.15);
+  color: #FF953B;
+  font-size: 18rpx;
+  padding: 4rpx 12rpx;
+  border-radius: $radius-round;
+  font-weight: $font-weight-medium;
+}
+
+.inlineChoice {
+  margin-top: $spacing-xs;
+  padding: $spacing-xs;
+  background: rgba(123, 58, 237, 0.05);
+  border-radius: $radius-sm;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.inlineSideA,
+.inlineSideB {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+}
+
+.reviewSection {
+  margin-top: $spacing-md;
+  padding: $spacing-lg;
+  background: rgba(255, 215, 0, 0.05);
+  border: 2rpx solid rgba(255, 215, 0, 0.3);
+  border-radius: $radius-lg;
+}
+
+.recButtons {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.recBtn {
+  flex: 1;
+  height: 88rpx;
+  border-radius: $radius-md;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  border: 2rpx solid transparent;
+  transition: all $transition-fast;
+  @include button-reset;
+}
+
+.recBtnA {
+  background: rgba(74, 144, 255, 0.1);
+  color: #4A90FF;
+  border-color: rgba(74, 144, 255, 0.3);
+
+  &.recBtnActive {
+    background: #4A90FF;
+    color: $color-text-white;
+    border-color: #4A90FF;
+  }
+}
+
+.recBtnB {
+  background: rgba(181, 151, 255, 0.1);
+  color: #B597FF;
+  border-color: rgba(181, 151, 255, 0.3);
+
+  &.recBtnActive {
+    background: linear-gradient(135deg, $color-primary, #8B5CF6);
+    color: $color-text-white;
+    border-color: $color-primary;
+  }
+}
+
+.reviewForm {
+  margin-bottom: $spacing-sm;
+}
+
+.reviewerInput {
+  height: 64rpx;
+  padding: 0 $spacing-md;
+  background: $color-bg-input;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-sm;
+  font-size: 24rpx;
+  color: $color-text-primary;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.reasonInput {
+  width: 100%;
+  min-height: 120rpx;
+  padding: $spacing-md;
+  background: $color-bg-input;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-sm;
+  font-size: 24rpx;
+  color: $color-text-primary;
+  line-height: 1.6;
+  box-sizing: border-box;
+  margin-bottom: $spacing-md;
+}
+
+.submitReviewBtn {
+  @include button-reset;
+  width: 100%;
+  height: 88rpx;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+  color: #1a1a2e;
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+
+  &:active {
+    opacity: 0.9;
+  }
+
+  &.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+}
+
+.trackHeaderA,
+.trackHeaderB {
+  position: relative;
+}

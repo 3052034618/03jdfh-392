@@ -178,39 +178,65 @@ const ExportPanel: React.FC<Props> = ({ visible, onClose }) => {
     return lines.join('\n');
   }, [rehearsalTracks, project]);
 
-  // 路径导出：把分支选择、对应批注和轨迹备注串起来
+  // 路径导出：把分支选择、对应批注和轨迹备注串起来，并按角色筛选
   const pathText = useMemo(() => {
     if (!selectedTrack) {
       return '请选择一条排练轨迹，生成专属路径导出版本。';
     }
     const t = selectedTrack;
     const lines: string[] = [];
-    // 从路径第一个节点获取角色
-    const firstNode = t.pathNodeIds.length > 0 ? project.nodes[t.pathNodeIds[0]] : null;
-    const ch = firstNode ? project.characters.find(c => c.id === firstNode.role) : null;
+    // 角色筛选：过滤路径节点
+    const pathNodes = roleFilter === 'all'
+      ? t.pathNodeIds.map(id => ({ id, node: project.nodes[id] }))
+      : t.pathNodeIds
+          .map(id => ({ id, node: project.nodes[id] }))
+          .filter(x => x.node && x.node.role === roleFilter);
+    const roleName = roleFilter === 'all'
+      ? '全角色'
+      : project.characters.find(c => c.id === roleFilter)?.name || '';
+
+    // 统计筛选后的数据
+    const filteredNodeIds = pathNodes.map(p => p.id);
+    const filteredRecorded = t.recordedNodeIds.filter(id => filteredNodeIds.includes(id));
+    // 相关批注：只要关联了筛选后任意一个节点就算，且只显示筛选后节点的关联
+    const relatedAnnotations = annotations.filter(a =>
+      a.dialogueIds.some(did => filteredNodeIds.includes(did))
+    );
 
     lines.push(`【${project.title}】- ${t.title} 专属排练台本`);
-    lines.push(`演员: ${t.actorName} | 角色: ${ch?.name || '多角色'}`);
+    lines.push(`演员: ${t.actorName} | 角色: ${roleName}`);
     lines.push(`创建时间: ${new Date(t.startedAt).toLocaleString('zh-CN')}`);
-    lines.push(`路径节点: ${t.pathNodeIds.length} 句 | 已录制: ${t.recordedNodeIds.length} 句`);
+    lines.push(`台词总数: ${t.pathNodeIds.length} 句 | 当前角色相关: ${pathNodes.length} 句`);
+    lines.push(`当前角色已录制: ${filteredRecorded.length} 句 | 相关批注: ${relatedAnnotations.length} 条`);
     if (t.note) {
       lines.push(`导演备注: ${t.note}`);
+    }
+    if (t.review?.recommended) {
+      lines.push(`⭐ 评审结论: 推荐此版 - ${t.review.reason}`);
+      lines.push(`   评审人: ${t.review.reviewerName}`);
     }
     lines.push('');
     lines.push('═'.repeat(40));
     lines.push('');
 
-    // 遍历路径节点
-    t.pathNodeIds.forEach((nodeId, index) => {
-      const node = project.nodes[nodeId];
+    // 其他角色提示：筛选角色不是全部时提示有跳过内容
+    if (roleFilter !== 'all' && pathNodes.length < t.pathNodeIds.length) {
+      const otherCount = t.pathNodeIds.length - pathNodes.length;
+      lines.push(`（注：此台本已过滤，仅保留${roleName}相关内容，其余${otherCount}句其他角色台词已跳过）`);
+      lines.push('');
+    }
+
+    // 遍历路径节点（保持原顺序，仅输出匹配角色的）
+    pathNodes.forEach(({ id: nodeId, node }, filteredIndex) => {
       if (!node) return;
+      const origIndex = t.pathNodeIds.indexOf(nodeId) + 1;
 
       const isRecorded = t.recordedNodeIds.includes(nodeId);
       const nodeAnns = annotations.filter(a => a.dialogueIds.includes(nodeId));
       const choiceId = t.choices[nodeId];
       const hasChoice = !!choiceId;
 
-      lines.push(`【第${index + 1}句】#${node.id} · ${node.character}`);
+      lines.push(`【第${origIndex}句·筛选后第${filteredIndex + 1}句】#${node.id} · ${node.character}`);
       lines.push('');
       lines.push(`  ${node.text}`);
       lines.push('');
@@ -225,8 +251,13 @@ const ExportPanel: React.FC<Props> = ({ visible, onClose }) => {
       if (hasChoice && node.choices) {
         const choiceObj = node.choices.find(c => c.id === choiceId);
         const nextNode = choiceObj ? project.nodes[choiceObj.nextNodeId] : null;
+        const nextIsTargetRole = nextNode
+          ? (roleFilter === 'all' || nextNode.role === roleFilter)
+          : true;
         lines.push(`  🎯 分支选择：「${choiceObj?.text || '?'}」`);
-        lines.push(`     → 进入 #${choiceObj?.nextNodeId || '?'} (${nextNode?.character || ''})`);
+        if (choiceObj?.nextNodeId) {
+          lines.push(`     → 进入 #${choiceObj.nextNodeId} (${nextNode?.character || ''})${!nextIsTargetRole ? '（进入其他角色）' : ''}`);
+        }
         lines.push('');
       }
 
@@ -235,48 +266,74 @@ const ExportPanel: React.FC<Props> = ({ visible, onClose }) => {
         nodeAnns.forEach((a, ai) => {
           const roleLabel = a.role === 'director' ? '导演' : '录音师';
           lines.push(`     ${ai + 1}. [${roleLabel}·${a.author}] ${a.content}`);
+          // 如果这条批注还关联了其他同角色台词，列出它们
+          const otherRelated = a.dialogueIds
+            .filter(did => did !== nodeId && filteredNodeIds.includes(did));
+          if (otherRelated.length > 0) {
+            const otherNodes = otherRelated.map(did => {
+              const n = project.nodes[did];
+              return `#${did}「${n?.text.slice(0, 10) || ''}...」`;
+            });
+            lines.push(`        (本条批注同时关联: ${otherNodes.join(', ')})`);
+          }
         });
         lines.push('');
       }
 
-      if (index < t.pathNodeIds.length - 1) {
+      if (filteredIndex < pathNodes.length - 1) {
         lines.push('─'.repeat(30));
       }
       lines.push('');
     });
 
-    // 情绪曲线摘要
+    // 集中输出批注摘要（角色筛选后）
+    if (relatedAnnotations.length > 0) {
+      lines.push('═'.repeat(40));
+      lines.push('');
+      lines.push(`� ${roleName === '全角色' ? '本路径全部批注' : `${roleName}相关批注汇总`}（${relatedAnnotations.length}条）`);
+      lines.push('');
+      relatedAnnotations.forEach((a, i) => {
+        const roleLabel = a.role === 'director' ? '导演' : '录音师';
+        // 仅列出筛选后角色的关联台词
+        const relatedLines = a.dialogueIds
+          .filter(did => filteredNodeIds.includes(did))
+          .map(did => {
+            const n = project.nodes[did];
+            return `#${did}「${n?.text.slice(0, 15) || ''}${n?.text && n.text.length > 15 ? '...' : ''}」`;
+          });
+        lines.push(`${i + 1}. [${roleLabel}·${a.author}] ${a.content}`);
+        lines.push(`   关联台词: ${relatedLines.join(', ')}`);
+        lines.push('');
+      });
+    }
+
+    // 情绪曲线摘要（仅筛选后节点）
     if (t.emotionCurve.length > 0) {
       lines.push('═'.repeat(40));
       lines.push('');
-      lines.push('📊 情绪曲线摘要');
-      const avg = (t.emotionCurve.reduce((s, p) => s + p.value, 0) / t.emotionCurve.length).toFixed(1);
-      const maxVal = Math.max(...t.emotionCurve.map(p => p.value));
-      const minVal = Math.min(...t.emotionCurve.map(p => p.value));
-      lines.push(`  平均情绪: ${avg}/10 | 最高: ${maxVal}/10 | 最低: ${minVal}/10`);
-      lines.push('');
-      // 找出情绪最高的节点（用索引对应路径节点）
-      let maxIdx = 0;
-      let minIdx = 0;
-      t.emotionCurve.forEach((p, i) => {
-        if (p.value > t.emotionCurve[maxIdx].value) maxIdx = i;
-        if (p.value < t.emotionCurve[minIdx].value) minIdx = i;
-      });
-      const topNodeId = t.pathNodeIds[maxIdx];
-      const topNode = topNodeId ? project.nodes[topNodeId] : null;
-      const lowNodeId = t.pathNodeIds[minIdx];
-      const lowNode = lowNodeId ? project.nodes[lowNodeId] : null;
-      if (topNode) {
-        lines.push(`  情绪最高点: #${topNode.id}「${topNode.text.slice(0, 20)}...」(${maxVal}/10)`);
+      lines.push(`📊 ${roleName === '全角色' ? '全路径' : roleName}情绪曲线摘要`);
+      // 找到筛选后节点在原路径中的索引，对应情绪曲线
+      const filteredEmotions = filteredNodeIds
+        .map(nid => {
+          const idx = t.pathNodeIds.indexOf(nid);
+          return { idx, point: t.emotionCurve[idx], nodeId: nid };
+        })
+        .filter(x => x.point !== undefined);
+      if (filteredEmotions.length > 0) {
+        const avg = (filteredEmotions.reduce((s, x) => s + (x.point?.value || 0), 0) / filteredEmotions.length).toFixed(1);
+        const maxItem = filteredEmotions.reduce((a, b) => ((a.point?.value || 0) > (b.point?.value || 0) ? a : b));
+        const minItem = filteredEmotions.reduce((a, b) => ((a.point?.value || 0) < (b.point?.value || 0) ? a : b));
+        const maxNode = maxItem.nodeId ? project.nodes[maxItem.nodeId] : null;
+        const minNode = minItem.nodeId ? project.nodes[minItem.nodeId] : null;
+        lines.push(`  平均情绪: ${avg}/10 | 最高: ${maxItem.point?.value}/10 | 最低: ${minItem.point?.value}/10`);
+        if (maxNode) lines.push(`  情绪最高点: #${maxNode.id}「${maxNode.text.slice(0, 20)}...」`);
+        if (minNode) lines.push(`  情绪最低点: #${minNode.id}「${minNode.text.slice(0, 20)}...」`);
+        lines.push('');
       }
-      if (lowNode) {
-        lines.push(`  情绪最低点: #${lowNode.id}「${lowNode.text.slice(0, 20)}...」(${minVal}/10)`);
-      }
-      lines.push('');
     }
 
     return lines.join('\n');
-  }, [selectedTrack, project, annotations]);
+  }, [selectedTrack, project, annotations, roleFilter]);
 
   const displayText = {
     all: fullText,
