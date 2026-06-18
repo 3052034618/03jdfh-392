@@ -122,8 +122,11 @@ const ScriptPage: React.FC = () => {
     }
   };
 
-  // 从树节点点击跳转
-  const handleTreeNodeClick = (nodeId: string) => {
+  // 从树节点点击跳转（带着角色切换）
+  const handleTreeNodeClick = (nodeId: string, roleId: string) => {
+    if (roleId && roleId !== currentCharacterId) {
+      setCurrentCharacterId(roleId);
+    }
     setSelectedNodeId(nodeId);
     setEditMode('text');
     setViewMode('list');

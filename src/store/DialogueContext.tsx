@@ -14,7 +14,6 @@ import {
   EmotionPoint
 } from '@/types/dialogue';
 import { mockScriptProject, mockAnnotations } from '@/data/mockScript';
-import { collectPath, buildEmotionCurve } from '@/utils/emotion';
 
 const STORAGE_KEY = 'horror_va_script_v2';
 
@@ -78,62 +77,133 @@ const buildInitialState = (): PersistState => {
 };
 
 // 构建树状结构
-const buildTree = (project: ScriptProject): { trees: TreeNode[]; brokenLinks: string[]; allNodes: Set<string> } => {
+const buildTree = (project: ScriptProject): { trees: TreeNode[]; brokenLinks: string[]; allNodes: Set<string>; confluenceNodes: string[]; orphanNodes: string[] } => {
   const nodes = project.nodes;
   const allNodeIds = new Set(Object.keys(nodes));
-  const visited = new Set<string>();
+
+  // 第一步：计算每个节点的父节点数（汇合节点检测）
+  const parentCount: Record<string, number> = {};
+  Object.keys(nodes).forEach(nid => { parentCount[nid] = 0; });
+  Object.values(nodes).forEach(node => {
+    if (node.nextNodeId && nodes[node.nextNodeId]) {
+      parentCount[node.nextNodeId] = (parentCount[node.nextNodeId] || 0) + 1;
+    }
+    if (node.choices) {
+      node.choices.forEach(ch => {
+        if (ch.nextNodeId && nodes[ch.nextNodeId]) {
+          parentCount[ch.nextNodeId] = (parentCount[ch.nextNodeId] || 0) + 1;
+        }
+      });
+    }
+  });
+
+  // 第二步：检测真正的断链（指向不存在的节点）
   const brokenLinks: string[] = [];
+  const brokenTargetsMap: Record<string, string[]> = {};
+  Object.values(nodes).forEach(node => {
+    if (node.nextNodeId && !nodes[node.nextNodeId]) {
+      brokenLinks.push(`${node.id}→${node.nextNodeId}`);
+      if (!brokenTargetsMap[node.id]) brokenTargetsMap[node.id] = [];
+      brokenTargetsMap[node.id].push(node.nextNodeId);
+    }
+    if (node.choices) {
+      node.choices.forEach(ch => {
+        if (ch.nextNodeId && !nodes[ch.nextNodeId]) {
+          brokenLinks.push(`${node.id}[${ch.text}]→${ch.nextNodeId}`);
+          if (!brokenTargetsMap[node.id]) brokenTargetsMap[node.id] = [];
+          brokenTargetsMap[node.id].push(ch.nextNodeId);
+        }
+      });
+    }
+  });
+
+  // 第三步：识别孤立节点（没有任何父节点，且不是起点）
+  const orphanNodes: string[] = [];
+  Object.keys(nodes).forEach(nid => {
+    if (parentCount[nid] === 0 && nid !== project.startNodeId) {
+      orphanNodes.push(nid);
+    }
+  });
+
+  // 第四步：识别汇合节点
+  const confluenceNodes: string[] = [];
+  Object.entries(parentCount).forEach(([nid, count]) => {
+    if (count >= 2) confluenceNodes.push(nid);
+  });
+
+  // 第五步：构建树结构（DFS，处理汇合节点时允许重复访问但标记为汇合）
+  const visited = new Set<string>();
   const trees: TreeNode[] = [];
 
-  const buildNode = (nodeId: string, level: number): TreeNode | null => {
-    if (visited.has(nodeId)) return null;
+  const buildNode = (nodeId: string, level: number, isOrphanRoot: boolean = false): TreeNode | null => {
     const node = nodes[nodeId];
-    if (!node) {
-      brokenLinks.push(nodeId);
-      return null;
+    if (!node) return null;
+
+    const alreadyVisited = visited.has(nodeId);
+    if (alreadyVisited) {
+      // 汇合点：返回一个简化节点，不继续递归
+      return {
+        id: nodeId,
+        node,
+        level,
+        children: [],
+        hasBrokenLink: false,
+        isEnd: false,
+        isConfluence: true,
+        parentCount: parentCount[nodeId] || 0,
+        isOrphan: false,
+        brokenTargets: brokenTargetsMap[nodeId] || []
+      };
     }
     visited.add(nodeId);
 
     const children: TreeNode[] = [];
-    let hasBroken = false;
+    let hasBroken = (brokenTargetsMap[nodeId] || []).length > 0;
 
     if (node.nextNodeId) {
       const child = buildNode(node.nextNodeId, level + 1);
       if (child) children.push(child);
-      else hasBroken = true;
     }
     if (node.choices) {
       node.choices.forEach(ch => {
-        const child = buildNode(ch.nextNodeId, level + 1);
-        if (child) children.push(child);
-        else hasBroken = true;
+        if (ch.nextNodeId && nodes[ch.nextNodeId]) {
+          const child = buildNode(ch.nextNodeId, level + 1);
+          if (child) children.push(child);
+        }
       });
     }
 
     const isEnd = !node.nextNodeId && (!node.choices || node.choices.length === 0);
+    const isConfluence = (parentCount[nodeId] || 0) >= 2;
+    const isOrphan = isOrphanRoot && orphanNodes.includes(nodeId);
+
     return {
       id: nodeId,
       node,
       level,
       children,
       hasBrokenLink: hasBroken,
-      isEnd
+      isEnd,
+      isConfluence,
+      parentCount: parentCount[nodeId] || 0,
+      isOrphan,
+      brokenTargets: brokenTargetsMap[nodeId] || []
     };
   };
 
-  // 从 startNodeId 开始
+  // 从 startNodeId 开始（主树）
   const mainTree = buildNode(project.startNodeId, 0);
   if (mainTree) trees.push(mainTree);
 
-  // 孤立节点
-  Object.keys(nodes).forEach(nid => {
+  // 孤立节点作为单独的树
+  orphanNodes.forEach(nid => {
     if (!visited.has(nid)) {
-      const orphan = buildNode(nid, 0);
-      if (orphan) trees.push(orphan);
+      const orphanTree = buildNode(nid, 0, true);
+      if (orphanTree) trees.push(orphanTree);
     }
   });
 
-  return { trees, brokenLinks, allNodes: allNodeIds };
+  return { trees, brokenLinks, allNodes: allNodeIds, confluenceNodes, orphanNodes };
 };
 
 interface DialogueContextType {
@@ -169,6 +239,9 @@ interface DialogueContextType {
   // 批注：一次可以关联多句，列表去重显示
   addAnnotation: (dialogueIds: string[], content: string, author: string) => void;
   getAnnotationsByDialogue: (dialogueId: string) => Annotation[];
+  addDialogueIdsToAnnotation: (annotationId: string, dialogueIds: string[]) => void;
+  removeDialogueIdsFromAnnotation: (annotationId: string, dialogueIds: string[]) => void;
+  deleteAnnotation: (annotationId: string) => void;
 
   // 排练轨迹
   saveRehearsalTrack: (params: {
@@ -183,7 +256,7 @@ interface DialogueContextType {
   loadRehearsalTrack: (trackId: string) => RehearsalTrack | undefined;
 
   // 树状总览
-  getTreeData: () => { trees: TreeNode[]; brokenLinks: string[]; allNodes: Set<string> };
+  getTreeData: () => { trees: TreeNode[]; brokenLinks: string[]; allNodes: Set<string>; confluenceNodes: string[]; orphanNodes: string[] };
 
   // 导出
   exportAllAsText: () => string;
@@ -421,6 +494,93 @@ export const DialogueProvider: React.FC<{ children: ReactNode }> = ({ children }
     return globalAnnotations.filter(a => a.dialogueIds.includes(dialogueId));
   }, [globalAnnotations]);
 
+  const addDialogueIdsToAnnotation = useCallback((annotationId: string, dialogueIds: string[]) => {
+    const ann = globalAnnotations.find(a => a.id === annotationId);
+    if (!ann) return;
+
+    const mergedIds = Array.from(new Set([...ann.dialogueIds, ...dialogueIds]));
+    const updated: Annotation = { ...ann, dialogueIds: mergedIds, createdAt: Date.now() };
+
+    setGlobalAnnotations(prev => prev.map(a => a.id === annotationId ? updated : a));
+
+    setProject(p => {
+      const next = { ...p, nodes: { ...p.nodes } };
+      dialogueIds.forEach(did => {
+        const target = next.nodes[did];
+        if (!target) return;
+        const others = (target.annotations || []).filter(a => a.id !== annotationId);
+        next.nodes[did] = { ...target, annotations: [...others, updated] };
+      });
+      return next;
+    });
+  }, [globalAnnotations]);
+
+  const removeDialogueIdsFromAnnotation = useCallback((annotationId: string, dialogueIds: string[]) => {
+    const ann = globalAnnotations.find(a => a.id === annotationId);
+    if (!ann) return;
+
+    const remainingIds = ann.dialogueIds.filter(id => !dialogueIds.includes(id));
+    const updated: Annotation = { ...ann, dialogueIds: remainingIds, createdAt: Date.now() };
+
+    if (remainingIds.length === 0) {
+      // 没有关联台词了就删除整个批注
+      setGlobalAnnotations(prev => prev.filter(a => a.id !== annotationId));
+      setProject(p => {
+        const next = { ...p, nodes: { ...p.nodes } };
+        dialogueIds.forEach(did => {
+          const target = next.nodes[did];
+          if (!target) return;
+          next.nodes[did] = {
+            ...target,
+            annotations: (target.annotations || []).filter(a => a.id !== annotationId)
+          };
+        });
+        return next;
+      });
+    } else {
+      setGlobalAnnotations(prev => prev.map(a => a.id === annotationId ? updated : a));
+      setProject(p => {
+        const next = { ...p, nodes: { ...p.nodes } };
+        dialogueIds.forEach(did => {
+          const target = next.nodes[did];
+          if (!target) return;
+          next.nodes[did] = {
+            ...target,
+            annotations: (target.annotations || []).filter(a => a.id !== annotationId)
+          };
+        });
+        // 给保留的台词更新批注
+        remainingIds.forEach(did => {
+          const target = next.nodes[did];
+          if (!target) return;
+          const others = (target.annotations || []).filter(a => a.id !== annotationId);
+          next.nodes[did] = { ...target, annotations: [...others, updated] };
+        });
+        return next;
+      });
+    }
+  }, [globalAnnotations]);
+
+  const deleteAnnotation = useCallback((annotationId: string) => {
+    const ann = globalAnnotations.find(a => a.id === annotationId);
+    if (!ann) return;
+
+    setGlobalAnnotations(prev => prev.filter(a => a.id !== annotationId));
+
+    setProject(p => {
+      const next = { ...p, nodes: { ...p.nodes } };
+      ann.dialogueIds.forEach(did => {
+        const target = next.nodes[did];
+        if (!target) return;
+        next.nodes[did] = {
+          ...target,
+          annotations: (target.annotations || []).filter(a => a.id !== annotationId)
+        };
+      });
+      return next;
+    });
+  }, [globalAnnotations]);
+
   const saveRehearsalTrack = useCallback((params: {
     pathNodeIds: string[];
     choices: Record<string, string>;
@@ -457,7 +617,6 @@ export const DialogueProvider: React.FC<{ children: ReactNode }> = ({ children }
   const getTreeData = useCallback(() => buildTree(project), [project]);
 
   const exportAllAsText = useCallback((): string => {
-    const { project, globalAnnotations, rehearsalTracks } = { project, globalAnnotations, rehearsalTracks };
     const lines: string[] = [];
     lines.push('═'.repeat(60));
     lines.push(`🎬 ${project.title}`);
@@ -568,6 +727,9 @@ export const DialogueProvider: React.FC<{ children: ReactNode }> = ({ children }
     markRecorded,
     addAnnotation,
     getAnnotationsByDialogue,
+    addDialogueIdsToAnnotation,
+    removeDialogueIdsFromAnnotation,
+    deleteAnnotation,
     saveRehearsalTrack,
     deleteRehearsalTrack,
     loadRehearsalTrack,

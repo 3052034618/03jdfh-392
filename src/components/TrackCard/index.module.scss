@@ -19,6 +19,16 @@
   box-shadow: 0 0 16rpx rgba(123, 58, 237, 0.2);
 }
 
+.selectedA {
+  border-color: rgba(59, 167, 255, 0.5);
+  background: rgba(59, 167, 255, 0.04);
+}
+
+.selectedB {
+  border-color: rgba(200, 116, 255, 0.5);
+  background: rgba(200, 116, 255, 0.04);
+}
+
 .header {
   display: flex;
   align-items: center;
@@ -245,4 +255,41 @@
   font-size: 22rpx;
   color: $color-text-tertiary;
   font-style: italic;
+}
+
+.compareRow {
+  display: flex;
+  gap: $spacing-sm;
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 2rpx dashed $color-border;
+}
+
+.compareBtn {
+  @include button-reset;
+  flex: 1;
+  height: 64rpx;
+  border-radius: $radius-md;
+  background: $color-bg-hover;
+  border: 2rpx solid $color-border;
+  color: $color-text-tertiary;
+  font-size: 22rpx;
+  font-weight: $font-weight-medium;
+  transition: all $transition-fast;
+
+  &:active {
+    opacity: 0.8;
+  }
+
+  &.activeA {
+    background: rgba(59, 167, 255, 0.15);
+    border-color: #3BA7FF;
+    color: #3BA7FF;
+  }
+
+  &.activeB {
+    background: rgba(200, 116, 255, 0.15);
+    border-color: #C874FF;
+    color: #C874FF;
+  }
 }

@@ -1,0 +1,345 @@
+@use '@/styles/variables.scss' as *;
+
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-md;
+  border-bottom: 2rpx solid $color-border;
+}
+
+.title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+}
+
+.closeBtn {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-round;
+  background: $color-bg-hover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-tertiary;
+  font-size: 28rpx;
+
+  &:active {
+    background: $color-border;
+  }
+}
+
+.trackHeaders {
+  display: flex;
+  align-items: stretch;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.trackHeaderA,
+.trackHeaderB {
+  flex: 1;
+  padding: $spacing-md;
+  border-radius: $radius-md;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.trackHeaderA {
+  background: rgba(59, 167, 255, 0.1);
+  border: 2rpx solid rgba(59, 167, 255, 0.3);
+}
+
+.trackHeaderB {
+  background: rgba(200, 116, 255, 0.1);
+  border: 2rpx solid rgba(200, 116, 255, 0.3);
+}
+
+.trackLabel {
+  font-size: 20rpx;
+  font-weight: $font-weight-bold;
+  opacity: 0.7;
+}
+
+.trackHeaderA .trackLabel {
+  color: #3BA7FF;
+}
+
+.trackHeaderB .trackLabel {
+  color: #C874FF;
+}
+
+.trackName {
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  @include text-ellipsis;
+}
+
+.trackMeta {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+}
+
+.vsBadge {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: $radius-round;
+  background: linear-gradient(135deg, $color-primary 0%, $emotion-scream 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20rpx;
+  font-weight: $font-weight-bold;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.statsRow {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.statCard {
+  flex: 1;
+  padding: $spacing-sm $spacing-xs;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  text-align: center;
+}
+
+.statNum {
+  display: block;
+  font-size: 32rpx;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.statLabel {
+  font-size: 18rpx;
+  color: $color-text-tertiary;
+}
+
+.section {
+  margin-bottom: $spacing-md;
+}
+
+.sectionTitle {
+  display: block;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-sm;
+}
+
+.curvesBox {
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  padding: $spacing-sm;
+  position: relative;
+}
+
+.curveLabelA,
+.curveLabelB {
+  position: absolute;
+  right: $spacing-sm;
+  font-size: 20rpx;
+  font-weight: $font-weight-semibold;
+  z-index: 2;
+}
+
+.curveLabelA {
+  top: $spacing-sm;
+  color: #3BA7FF;
+}
+
+.curveLabelB {
+  bottom: $spacing-sm;
+  color: #C874FF;
+}
+
+.maxDiffTip {
+  margin-top: $spacing-sm;
+  padding: $spacing-xs $spacing-sm;
+  background: rgba(255, 200, 87, 0.1);
+  border-radius: $radius-sm;
+  font-size: 22rpx;
+  color: $emotion-close;
+}
+
+.diffList {
+  max-height: 500rpx;
+  border-radius: $radius-md;
+  background: $color-bg-hover;
+}
+
+.diffItem {
+  display: flex;
+  gap: $spacing-sm;
+  padding: $spacing-sm;
+  border-bottom: 2rpx solid $color-border;
+  transition: all $transition-fast;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.hasDiff {
+    background: rgba(255, 59, 92, 0.04);
+  }
+}
+
+.diffIdx {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: $radius-round;
+  background: $color-bg-card;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  font-weight: $font-weight-semibold;
+  flex-shrink: 0;
+}
+
+.diffContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.diffMeta {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+  margin-bottom: 4rpx;
+}
+
+.diffId {
+  font-size: 22rpx;
+  font-weight: $font-weight-semibold;
+  color: $color-primary-light;
+}
+
+.diffTag {
+  padding: 2rpx 10rpx;
+  border-radius: $radius-round;
+  font-size: 18rpx;
+  font-weight: $font-weight-medium;
+
+  &.path {
+    background: rgba(157, 107, 255, 0.15);
+    color: #9D6BFF;
+  }
+
+  &.record {
+    background: rgba(47, 212, 166, 0.15);
+    color: #2FD4A6;
+  }
+
+  &.intensity {
+    background: rgba(255, 200, 87, 0.15);
+    color: $emotion-close;
+  }
+
+  &.choice {
+    background: rgba(59, 167, 255, 0.15);
+    color: #3BA7FF;
+  }
+}
+
+.diffText {
+  font-size: 22rpx;
+  color: $color-text-secondary;
+  line-height: 1.5;
+  margin-bottom: $spacing-xs;
+  @include text-ellipsis-multi(2);
+}
+
+.diffCompare {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.diffSideA,
+.diffSideB {
+  flex: 1;
+  padding: $spacing-xs;
+  border-radius: $radius-sm;
+  background: $color-bg-card;
+}
+
+.diffSideA {
+  border: 2rpx solid rgba(59, 167, 255, 0.2);
+}
+
+.diffSideB {
+  border: 2rpx solid rgba(200, 116, 255, 0.2);
+}
+
+.sideLabel {
+  font-size: 18rpx;
+  font-weight: $font-weight-bold;
+  margin-bottom: 4rpx;
+}
+
+.diffSideA .sideLabel {
+  color: #3BA7FF;
+}
+
+.diffSideB .sideLabel {
+  color: #C874FF;
+}
+
+.sideBadges {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  flex-wrap: wrap;
+}
+
+.recordBadge {
+  padding: 2rpx 8rpx;
+  border-radius: $radius-round;
+  font-size: 18rpx;
+  background: rgba(110, 110, 138, 0.2);
+  color: $color-text-tertiary;
+
+  &.recorded {
+    background: rgba(47, 212, 166, 0.15);
+    color: #2FD4A6;
+  }
+}
+
+.intensityText {
+  font-size: 18rpx;
+  color: $color-text-secondary;
+}
+
+.missText {
+  font-size: 18rpx;
+  color: $color-text-tertiary;
+  font-style: italic;
+}
+
+.diffArrow {
+  font-size: 24rpx;
+  color: $color-text-tertiary;
+  flex-shrink: 0;
+}

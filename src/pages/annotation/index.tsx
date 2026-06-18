@@ -4,7 +4,7 @@ import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 import { useDialogue } from '@/store/DialogueContext';
-import { DialogueNode as NodeType, Annotation as AnnType } from '@/types/dialogue';
+import { DialogueNode } from '@/types/dialogue';
 import AnnotationCard from '@/components/AnnotationCard';
 import PerformanceTag from '@/components/PerformanceTag';
 
@@ -19,6 +19,7 @@ const QUICK_LABELS = [
 ];
 
 type FilterType = 'all' | 'director' | 'audio' | string;
+type SortType = 'time-desc' | 'time-asc' | 'count-desc' | 'count-asc';
 
 const AnnotationPage: React.FC = () => {
   const {
@@ -26,28 +27,51 @@ const AnnotationPage: React.FC = () => {
     nodesList,
     setCurrentCharacterId,
     annotations,
-    addAnnotation
+    addAnnotation,
+    addDialogueIdsToAnnotation
   } = useDialogue();
 
-  // 本页独立角色过滤（不依赖全局）
   const [localRoleId, setLocalRoleId] = useState<string>('all');
   const [filter, setFilter] = useState<FilterType>('all');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [content, setContent] = useState('');
   const [author, setAuthor] = useState('李导');
+  const [sortType, setSortType] = useState<SortType>('time-desc');
+  const [showSortMenu, setShowSortMenu] = useState(false);
+  const [showAddLinkPanel, setShowAddLinkPanel] = useState(false);
+  const [editingAnnotationId, setEditingAnnotationId] = useState<string | null>(null);
+  const [addLinkSelectedIds, setAddLinkSelectedIds] = useState<string[]>([]);
+  const [authorFilter, setAuthorFilter] = useState<string>('all');
+  const [countFilter, setCountFilter] = useState<'all' | 'single' | 'multi'>('all');
+
+  const uniqueAuthors = useMemo(() => {
+    const authors = new Set<string>();
+    annotations.forEach(a => authors.add(a.author));
+    return Array.from(authors);
+  }, [annotations]);
+
+  // 角色统计：按批注去重（每条批注只算一次，不管关联多少句同角色台词）
+  const byCharCountsDedup = useMemo(() => {
+    const counts: Record<string, number> = {};
+    annotations.forEach(a => {
+      const rolesInThisAnn = new Set<string>();
+      a.dialogueIds.forEach(did => {
+        const node = project.nodes[did];
+        if (node) rolesInThisAnn.add(node.role);
+      });
+      rolesInThisAnn.forEach(roleId => {
+        counts[roleId] = (counts[roleId] || 0) + 1;
+      });
+    });
+    return counts;
+  }, [annotations, project.nodes]);
 
   const directorCount = annotations.filter(a => a.role === 'director').length;
   const audioCount = annotations.filter(a => a.role === 'audio').length;
-  const byCharCounts: Record<string, number> = {};
-  annotations.forEach(a => {
-    a.dialogueIds.forEach(did => {
-      const node = project.nodes[did];
-      if (node) byCharCounts[node.role] = (byCharCounts[node.role] || 0) + 1;
-    });
-  });
 
   const filteredAnnotations = useMemo(() => {
-    let list = [...annotations].sort((a, b) => b.createdAt - a.createdAt);
+    let list = [...annotations];
+
     if (filter === 'director') list = list.filter(a => a.role === 'director');
     else if (filter === 'audio') list = list.filter(a => a.role === 'audio');
     else if (filter !== 'all') list = list.filter(a => {
@@ -56,10 +80,30 @@ const AnnotationPage: React.FC = () => {
         return node?.role === filter;
       });
     });
-    return list;
-  }, [annotations, filter, project.nodes]);
 
-  // 本页可选台词：按 localRoleId 过滤，'all' 显示全部
+    if (authorFilter !== 'all') {
+      list = list.filter(a => a.author === authorFilter);
+    }
+
+    if (countFilter === 'single') {
+      list = list.filter(a => a.dialogueIds.length === 1);
+    } else if (countFilter === 'multi') {
+      list = list.filter(a => a.dialogueIds.length >= 2);
+    }
+
+    if (sortType === 'time-desc') {
+      list.sort((a, b) => b.createdAt - a.createdAt);
+    } else if (sortType === 'time-asc') {
+      list.sort((a, b) => a.createdAt - b.createdAt);
+    } else if (sortType === 'count-desc') {
+      list.sort((a, b) => b.dialogueIds.length - a.dialogueIds.length);
+    } else if (sortType === 'count-asc') {
+      list.sort((a, b) => a.dialogueIds.length - b.dialogueIds.length);
+    }
+
+    return list;
+  }, [annotations, filter, authorFilter, countFilter, sortType, project.nodes]);
+
   const selectableNodes = useMemo(() => {
     if (localRoleId === 'all') return nodesList;
     return nodesList.filter(n => n.role === localRoleId);
@@ -84,7 +128,6 @@ const AnnotationPage: React.FC = () => {
       Taro.showToast({ title: '请至少选择一句台词', icon: 'none' });
       return;
     }
-    // 一次调用：向多个对白写入各自独立 id 的批注
     addAnnotation(selectedIds, content.trim(), author.trim() || '导演');
     Taro.showToast({
       title: `已提交批注`,
@@ -94,15 +137,46 @@ const AnnotationPage: React.FC = () => {
     setSelectedIds([]);
   };
 
-  const firstSelected: NodeType | undefined = selectedIds[0]
+  const firstSelected: DialogueNode | undefined = selectedIds[0]
     ? project.nodes[selectedIds[0]]
     : undefined;
 
   const switchLocalRole = (id: string) => {
     setLocalRoleId(id);
-    setSelectedIds([]); // 切换角色清空已选，避免选中别的角色的台词
-    // 同步到全局方便排练页等保持一致
+    setSelectedIds([]);
     if (id !== 'all') setCurrentCharacterId(id);
+  };
+
+  const handleAddDialogueToAnnotation = (annotationId: string) => {
+    setEditingAnnotationId(annotationId);
+    setAddLinkSelectedIds([]);
+    setShowAddLinkPanel(true);
+  };
+
+  const toggleAddLinkSelect = (id: string) => {
+    setAddLinkSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
+  const confirmAddLink = () => {
+    if (!editingAnnotationId) return;
+    if (addLinkSelectedIds.length === 0) {
+      Taro.showToast({ title: '请选择要追加的台词', icon: 'none' });
+      return;
+    }
+    addDialogueIdsToAnnotation(editingAnnotationId, addLinkSelectedIds);
+    Taro.showToast({ title: '已追加关联', icon: 'success' });
+    setShowAddLinkPanel(false);
+    setEditingAnnotationId(null);
+    setAddLinkSelectedIds([]);
+  };
+
+  const sortLabel = {
+    'time-desc': '时间倒序',
+    'time-asc': '时间正序',
+    'count-desc': '关联多→少',
+    'count-asc': '关联少→多'
   };
 
   return (
@@ -146,39 +220,76 @@ const AnnotationPage: React.FC = () => {
       </View>
 
       {/* 筛选栏 */}
-      <ScrollView className={styles.filterBar} scrollX enhanced showScrollbar={false}>
-        <View
-          className={classnames(styles.filterChip, filter === 'all' && styles.activeChip)}
-          onClick={() => setFilter('all')}
-        >
-          <Text className={styles.filterText}>全部批注</Text>
-          <View className={styles.filterCount}>{annotations.length}</View>
-        </View>
-        <View
-          className={classnames(styles.filterChip, filter === 'director' && styles.activeChip)}
-          onClick={() => setFilter('director')}
-        >
-          <Text className={styles.filterText}>导演批注</Text>
-          <View className={styles.filterCount}>{directorCount}</View>
-        </View>
-        <View
-          className={classnames(styles.filterChip, filter === 'audio' && styles.activeChip)}
-          onClick={() => setFilter('audio')}
-        >
-          <Text className={styles.filterText}>录音师</Text>
-          <View className={styles.filterCount}>{audioCount}</View>
-        </View>
-        {project.characters.map(ch => (
+      <View className={styles.filterSection}>
+        <ScrollView className={styles.filterBar} scrollX enhanced showScrollbar={false}>
           <View
-            key={ch.id}
-            className={classnames(styles.filterChip, filter === ch.id && styles.activeChip)}
-            onClick={() => setFilter(ch.id)}
+            className={classnames(styles.filterChip, filter === 'all' && styles.activeChip)}
+            onClick={() => setFilter('all')}
           >
-            <Text className={styles.filterText}>{ch.name}</Text>
-            <View className={styles.filterCount}>{byCharCounts[ch.id] || 0}</View>
+            <Text className={styles.filterText}>全部批注</Text>
+            <View className={styles.filterCount}>{annotations.length}</View>
           </View>
-        ))}
-      </ScrollView>
+          <View
+            className={classnames(styles.filterChip, filter === 'director' && styles.activeChip)}
+            onClick={() => setFilter('director')}
+          >
+            <Text className={styles.filterText}>导演批注</Text>
+            <View className={styles.filterCount}>{directorCount}</View>
+          </View>
+          <View
+            className={classnames(styles.filterChip, filter === 'audio' && styles.activeChip)}
+            onClick={() => setFilter('audio')}
+          >
+            <Text className={styles.filterText}>录音师</Text>
+            <View className={styles.filterCount}>{audioCount}</View>
+          </View>
+          {project.characters.map(ch => (
+            <View
+              key={ch.id}
+              className={classnames(styles.filterChip, filter === ch.id && styles.activeChip)}
+              onClick={() => setFilter(ch.id)}
+            >
+              <Text className={styles.filterText}>{ch.name}</Text>
+              <View className={styles.filterCount}>{byCharCountsDedup[ch.id] || 0}</View>
+            </View>
+          ))}
+        </ScrollView>
+
+        <View className={styles.subFilterRow}>
+          <ScrollView className={styles.subFilterBar} scrollX showScrollbar={false}>
+            <Text className={styles.subFilterLabel}>作者:</Text>
+            <View
+              className={classnames(styles.subChip, authorFilter === 'all' && styles.subActive)}
+              onClick={() => setAuthorFilter('all')}
+            >全部</View>
+            {uniqueAuthors.map(au => (
+              <View
+                key={au}
+                className={classnames(styles.subChip, authorFilter === au && styles.subActive)}
+                onClick={() => setAuthorFilter(au)}
+              >{au}</View>
+            ))}
+          </ScrollView>
+        </View>
+
+        <View className={styles.subFilterRow}>
+          <ScrollView className={styles.subFilterBar} scrollX showScrollbar={false}>
+            <Text className={styles.subFilterLabel}>关联:</Text>
+            <View
+              className={classnames(styles.subChip, countFilter === 'all' && styles.subActive)}
+              onClick={() => setCountFilter('all')}
+            >全部</View>
+            <View
+              className={classnames(styles.subChip, countFilter === 'single' && styles.subActive)}
+              onClick={() => setCountFilter('single')}
+            >单句</View>
+            <View
+              className={classnames(styles.subChip, countFilter === 'multi' && styles.subActive)}
+              onClick={() => setCountFilter('multi')}
+            >多句</View>
+          </ScrollView>
+        </View>
+      </View>
 
       {/* 选中台词面板 */}
       <View className={styles.selectPanel}>
@@ -286,7 +397,24 @@ const AnnotationPage: React.FC = () => {
         <Text className={styles.sectionTitle}>
           📚 批注列表（{filteredAnnotations.length}）
         </Text>
-        <Button className={styles.sortBtn}>⇅ 时间倒序</Button>
+        <View style={{ position: 'relative' }}>
+          <Button className={styles.sortBtn} onClick={() => setShowSortMenu(!showSortMenu)}>
+            ⇅ {sortLabel[sortType]}
+          </Button>
+          {showSortMenu && (
+            <View className={styles.sortMenu}>
+              {Object.entries(sortLabel).map(([key, label]) => (
+                <View
+                  key={key}
+                  className={classnames(styles.sortItem, sortType === key && styles.sortItemActive)}
+                  onClick={() => { setSortType(key as SortType); setShowSortMenu(false); }}
+                >
+                  {label}
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
       </View>
 
       {filteredAnnotations.length === 0 ? (
@@ -302,8 +430,76 @@ const AnnotationPage: React.FC = () => {
           <AnnotationCard
             key={ann.id}
             annotation={ann}
+            onAddDialogue={handleAddDialogueToAnnotation}
           />
         ))
+      )}
+
+      {/* 追加关联台词弹窗 */}
+      {showAddLinkPanel && (
+        <View className={styles.modalMask} onClick={() => setShowAddLinkPanel(false)}>
+          <View className={styles.modalSheet} onClick={e => e.stopPropagation()}>
+            <View className={styles.modalHeader}>
+              <Text className={styles.modalTitle}>➕ 追加关联台词</Text>
+              <Button className={styles.closeBtn} onClick={() => setShowAddLinkPanel(false)}>✕</Button>
+            </View>
+            <View className={styles.modalTip}>
+              选择要追加到这条批注的台词（可多选，已选 {addLinkSelectedIds.length} 条）
+            </View>
+            <ScrollView className={styles.modalList} scrollY>
+              {nodesList.length === 0 ? (
+                <Text style={{ color: '#6E6E8A', fontSize: '24rpx', padding: '32rpx' }}>
+                  没有台词可选
+                </Text>
+              ) : (
+                nodesList.map(node => {
+                  const checked = addLinkSelectedIds.includes(node.id);
+                  const alreadyLinked = editingAnnotationId
+                    ? annotations.find(a => a.id === editingAnnotationId)?.dialogueIds.includes(node.id)
+                    : false;
+                  const ch = project.characters.find(c => c.id === node.role);
+                  return (
+                    <View
+                      key={node.id}
+                      className={classnames(
+                        styles.selectItem,
+                        checked && styles.selectedItem,
+                        alreadyLinked && styles.alreadyLinked
+                      )}
+                      onClick={() => {
+                        if (alreadyLinked) return;
+                        toggleAddLinkSelect(node.id);
+                      }}
+                    >
+                      <View
+                        className={styles.selAvatar}
+                        style={{ background: ch?.color || '#7B3AED' }}
+                      >{node.character.slice(0, 1)}</View>
+                      <View className={styles.selContent}>
+                        <Text className={styles.selName}>#{node.id} · {node.character}</Text>
+                        <Text className={styles.selText}>{node.text}</Text>
+                        {alreadyLinked && (
+                          <Text style={{ fontSize: 20, color: '#2FD4A6', marginTop: 4 }}>
+                            ✓ 已关联
+                          </Text>
+                        )}
+                      </View>
+                      <View className={classnames(styles.checkBox, checked && styles.checkedBox)}>
+                        {checked && <Text className={styles.checkMark}>✓</Text>}
+                      </View>
+                    </View>
+                  );
+                })
+              )}
+            </ScrollView>
+            <Button
+              className={classnames(styles.primaryBtn, addLinkSelectedIds.length === 0 && styles.disabled)}
+              onClick={confirmAddLink}
+            >
+              确认追加（{addLinkSelectedIds.length}条）
+            </Button>
+          </View>
+        </View>
       )}
     </ScrollView>
   );

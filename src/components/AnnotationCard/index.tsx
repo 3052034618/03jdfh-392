@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text } from '@tarojs/components';
+import { View, Text, Button, ScrollView } from '@tarojs/components';
+import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 import { Annotation, DialogueNode } from '@/types/dialogue';
@@ -9,6 +10,7 @@ import { formatTime } from '@/utils/emotion';
 interface Props {
   annotation: Annotation;
   onClick?: () => void;
+  onAddDialogue?: (annotationId: string) => void;
 }
 
 const extractKeywords = (text: string): string[] => {
@@ -29,8 +31,8 @@ const extractKeywords = (text: string): string[] => {
   return found.slice(0, 4);
 };
 
-const AnnotationCard: React.FC<Props> = ({ annotation, onClick }) => {
-  const { project, getCharacterById } = useDialogue();
+const AnnotationCard: React.FC<Props> = ({ annotation, onClick, onAddDialogue }) => {
+  const { project, getCharacterById, removeDialogueIdsFromAnnotation, deleteAnnotation } = useDialogue();
   const [expanded, setExpanded] = useState(false);
 
   const keywords = extractKeywords(annotation.content);
@@ -40,10 +42,43 @@ const AnnotationCard: React.FC<Props> = ({ annotation, onClick }) => {
     .map(id => project.nodes[id])
     .filter(Boolean) as DialogueNode[];
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (e: any) => {
     e.stopPropagation();
     setExpanded(!expanded);
     onClick?.();
+  };
+
+  const handleRemoveDialogue = (e: any, nodeId: string) => {
+    e.stopPropagation();
+    Taro.showModal({
+      title: '移除关联',
+      content: '确定要移除这句台词的关联吗？',
+      success: (res) => {
+        if (res.confirm) {
+          removeDialogueIdsFromAnnotation(annotation.id, [nodeId]);
+          Taro.showToast({ title: '已移除', icon: 'success' });
+        }
+      }
+    });
+  };
+
+  const handleDelete = (e: any) => {
+    e.stopPropagation();
+    Taro.showModal({
+      title: '删除批注',
+      content: '确定要删除这条批注吗？删除后不可恢复。',
+      success: (res) => {
+        if (res.confirm) {
+          deleteAnnotation(annotation.id);
+          Taro.showToast({ title: '已删除', icon: 'success' });
+        }
+      }
+    });
+  };
+
+  const handleAddDialogue = (e: any) => {
+    e.stopPropagation();
+    onAddDialogue?.(annotation.id);
   };
 
   return (
@@ -68,13 +103,26 @@ const AnnotationCard: React.FC<Props> = ({ annotation, onClick }) => {
             </View>
           </View>
         </View>
-        <Text className={classnames(styles.arrow, expanded && styles.expandedArrow)}>▾</Text>
+        <View style={{ display: 'flex', alignItems: 'center', gap: '12rpx' }}>
+          <Button className={styles.delBtn} onClick={handleDelete}>🗑️</Button>
+          <Text className={classnames(styles.arrow, expanded && styles.expandedArrow)}>▾</Text>
+        </View>
+      </View>
+
+      <View className={styles.content}>
+        <Text className={styles.quoteMark}>“</Text>
+        <Text>{annotation.content}</Text>
       </View>
 
       {expanded && linkedNodes.length > 0 && (
         <View className={styles.linkedSection}>
-          <Text className={styles.linkedTitle}>📜 关联的台词：</Text>
-          <View className={styles.linkedList}>
+          <View className={styles.linkedHeader}>
+            <Text className={styles.linkedTitle}>📜 关联的台词（{linkedNodes.length}句）</Text>
+            <Button className={styles.addLinkBtn} onClick={handleAddDialogue}>
+              + 追加关联
+            </Button>
+          </View>
+          <ScrollView className={styles.linkedList} scrollY>
             {linkedNodes.map((node, idx) => {
               const ch = getCharacterById(node.role);
               return (
@@ -87,10 +135,16 @@ const AnnotationCard: React.FC<Props> = ({ annotation, onClick }) => {
                     </View>
                     <Text className={styles.linkedText}>{node.text}</Text>
                   </View>
+                  <Button
+                    className={styles.removeBtn}
+                    onClick={(e) => handleRemoveDialogue(e, node.id)}
+                  >
+                    移除
+                  </Button>
                 </View>
               );
             })}
-          </View>
+          </ScrollView>
         </View>
       )}
 
@@ -103,11 +157,6 @@ const AnnotationCard: React.FC<Props> = ({ annotation, onClick }) => {
           <Text className={styles.refText}>{linkedNodes[0].text}</Text>
         </View>
       )}
-
-      <View className={styles.content}>
-        <Text className={styles.quoteMark}>“</Text>
-        <Text>{annotation.content}</Text>
-      </View>
 
       {keywords.length > 0 && (
         <View className={styles.keywords}>

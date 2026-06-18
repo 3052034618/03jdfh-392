@@ -12,9 +12,23 @@ interface Props {
   track: RehearsalTrack;
   onResume?: (track: RehearsalTrack) => void;
   onDelete?: (trackId: string) => void;
+  compareMode?: boolean;
+  selectedA?: boolean;
+  selectedB?: boolean;
+  onSelectA?: (trackId: string) => void;
+  onSelectB?: (trackId: string) => void;
 }
 
-const TrackCard: React.FC<Props> = ({ track, onResume, onDelete }) => {
+const TrackCard: React.FC<Props> = ({
+  track,
+  onResume,
+  onDelete,
+  compareMode,
+  selectedA,
+  selectedB,
+  onSelectA,
+  onSelectB
+}) => {
   const { project, deleteRehearsalTrack } = useDialogue();
   const [expanded, setExpanded] = useState(false);
 
@@ -40,8 +54,23 @@ const TrackCard: React.FC<Props> = ({ track, onResume, onDelete }) => {
     onResume?.(track);
   };
 
+  const handleSelectA = (e) => {
+    e.stopPropagation();
+    onSelectA?.(track.id);
+  };
+
+  const handleSelectB = (e) => {
+    e.stopPropagation();
+    onSelectB?.(track.id);
+  };
+
   return (
-    <View className={classnames(styles.card, expanded && styles.expanded)}>
+    <View className={classnames(
+      styles.card,
+      expanded && styles.expanded,
+      selectedA && styles.selectedA,
+      selectedB && styles.selectedB
+    )}>
       <View className={styles.header} onClick={() => setExpanded(!expanded)}>
         <View className={styles.main}>
           <Text className={styles.title}>{track.title}</Text>
@@ -71,6 +100,23 @@ const TrackCard: React.FC<Props> = ({ track, onResume, onDelete }) => {
           <Text className={styles.arrow}>▾</Text>
         </View>
       </View>
+
+      {compareMode && (
+        <View className={styles.compareRow}>
+          <Button
+            className={classnames(styles.compareBtn, selectedA && styles.activeA)}
+            onClick={handleSelectA}
+          >
+            {selectedA ? '✓ ' : ''}设为 A
+          </Button>
+          <Button
+            className={classnames(styles.compareBtn, selectedB && styles.activeB)}
+            onClick={handleSelectB}
+          >
+            {selectedB ? '✓ ' : ''}设为 B
+          </Button>
+        </View>
+      )}
 
       {expanded && (
         <View className={styles.body}>

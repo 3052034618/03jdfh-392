@@ -92,6 +92,10 @@ export interface TreeNode {
   children: TreeNode[];
   hasBrokenLink: boolean;  // 断链（nextNodeId/choice.nextNodeId 指向不存在的节点）
   isEnd: boolean;          // 路径终点
+  isConfluence: boolean;   // 汇合节点（有多个父节点指向它）
+  parentCount: number;     // 父节点数量
+  isOrphan: boolean;       // 孤立节点（不在主树上，没有父节点）
+  brokenTargets: string[]; // 具体哪些指向是断的
 }
 
 export interface PersistState {

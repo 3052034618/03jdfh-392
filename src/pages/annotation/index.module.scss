@@ -479,3 +479,223 @@
   color: $color-text-tertiary;
   line-height: 1.6;
 }
+
+.filterSection {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  margin-bottom: $spacing-md;
+  border: 2rpx solid $color-border;
+}
+
+.filterBar {
+  margin-bottom: $spacing-sm;
+}
+
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  height: 56rpx;
+  padding: 0 $spacing-md;
+  margin-right: 16rpx;
+  background: $color-bg-input;
+  border-radius: $radius-round;
+  border: 2rpx solid $color-border;
+  white-space: nowrap;
+  transition: all $transition-base;
+
+  &.activeChip {
+    background: rgba(123, 58, 237, 0.15);
+    border-color: $color-primary;
+  }
+}
+
+.filterText {
+  font-size: 24rpx;
+  color: $color-text-secondary;
+}
+
+.activeChip .filterText {
+  color: $color-primary-light;
+  font-weight: $font-weight-medium;
+}
+
+.filterCount {
+  min-width: 36rpx;
+  height: 36rpx;
+  padding: 0 8rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: $radius-round;
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: $font-weight-medium;
+}
+
+.activeChip .filterCount {
+  background: $color-primary;
+  color: $color-text-white;
+}
+
+.subFilterRow {
+  margin-top: 12rpx;
+}
+
+.subFilterBar {
+  display: flex;
+  align-items: center;
+}
+
+.subFilterLabel {
+  font-size: 22rpx;
+  color: $color-text-tertiary;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.subChip {
+  height: 44rpx;
+  padding: 0 20rpx;
+  margin-right: 12rpx;
+  background: $color-bg-input;
+  border-radius: $radius-sm;
+  font-size: 22rpx;
+  color: $color-text-secondary;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  transition: all $transition-base;
+
+  &.subActive {
+    background: rgba(47, 212, 166, 0.15);
+    color: #2FD4A6;
+  }
+}
+
+.sortMenu {
+  position: absolute;
+  top: 64rpx;
+  right: 0;
+  background: $color-bg-card;
+  border: 2rpx solid $color-border;
+  border-radius: $radius-md;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.4);
+  z-index: 100;
+  min-width: 240rpx;
+  overflow: hidden;
+}
+
+.sortItem {
+  height: 80rpx;
+  padding: 0 $spacing-md;
+  font-size: 24rpx;
+  color: $color-text-secondary;
+  display: flex;
+  align-items: center;
+  transition: all $transition-base;
+
+  &:active, &.sortItemActive {
+    background: rgba(123, 58, 237, 0.1);
+    color: $color-primary-light;
+  }
+
+  &.sortItemActive {
+    font-weight: $font-weight-medium;
+  }
+}
+
+.modalMask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.modalSheet {
+  width: 100%;
+  max-height: 80vh;
+  background: $color-bg-card;
+  border-radius: 32rpx 32rpx 0 0;
+  padding: $spacing-lg;
+  padding-bottom: calc(#{$spacing-lg} + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.modalTitle {
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.closeBtn {
+  @include button-reset;
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-round;
+  background: $color-bg-input;
+  font-size: 24rpx;
+  color: $color-text-tertiary;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalTip {
+  font-size: 24rpx;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-md;
+}
+
+.modalList {
+  flex: 1;
+  max-height: 50vh;
+  margin-bottom: $spacing-md;
+}
+
+.primaryBtn {
+  @include button-reset;
+  height: 88rpx;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  box-shadow: 0 4rpx 20rpx rgba(123, 58, 237, 0.3);
+
+  &:active {
+    opacity: 0.9;
+  }
+
+  &.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+}
+
+.alreadyLinked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

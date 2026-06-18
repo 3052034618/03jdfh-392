@@ -24,12 +24,18 @@
   gap: $spacing-md;
 }
 
+.statusScroll {
+  flex: 1;
+  white-space: nowrap;
+}
+
 .statusItem {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6rpx;
   font-size: 22rpx;
   color: $color-text-secondary;
+  margin-right: $spacing-md;
 
   &.broken {
     color: $emotion-scream;
@@ -37,6 +43,14 @@
 
   &.ok {
     color: $emotion-normal;
+  }
+
+  &.confluence {
+    color: $emotion-close;
+  }
+
+  &.orphan {
+    color: #9D6BFF;
   }
 }
 
@@ -88,6 +102,16 @@
   background: rgba(255, 59, 92, 0.06);
 }
 
+.confluenceContent {
+  border-color: rgba(255, 200, 87, 0.5);
+  background: rgba(255, 200, 87, 0.06);
+}
+
+.orphanContent {
+  border-color: rgba(157, 107, 255, 0.4);
+  background: rgba(157, 107, 255, 0.06);
+}
+
 .nodeLeft {
   display: flex;
   flex-direction: column;
@@ -102,9 +126,46 @@
   color: $color-primary-light;
 }
 
+.nodeHeaderRow {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.nodeId {
+  font-size: 22rpx;
+  font-weight: $font-weight-semibold;
+  color: $color-primary-light;
+}
+
 .nodeChar {
   font-size: 20rpx;
   color: $color-text-tertiary;
+  font-weight: $font-weight-medium;
+}
+
+.confluenceBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2rpx 10rpx;
+  background: rgba(255, 200, 87, 0.15);
+  color: $emotion-close;
+  font-size: 18rpx;
+  border-radius: $radius-round;
+  font-weight: $font-weight-medium;
+  width: fit-content;
+}
+
+.orphanBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2rpx 10rpx;
+  background: rgba(157, 107, 255, 0.15);
+  color: #9D6BFF;
+  font-size: 18rpx;
+  border-radius: $radius-round;
+  font-weight: $font-weight-medium;
+  width: fit-content;
 }
 
 .nodeRight {
@@ -163,6 +224,30 @@
   animation: blink 1.5s infinite;
 }
 
+.recordedIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 2rpx 10rpx;
+  background: rgba(47, 212, 166, 0.1);
+  color: $emotion-normal;
+  font-size: 18rpx;
+  border-radius: $radius-round;
+  margin-left: auto;
+}
+
+.confluenceIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4rpx;
+  padding: 2rpx 10rpx;
+  background: rgba(255, 200, 87, 0.1);
+  color: $emotion-close;
+  font-size: 18rpx;
+  border-radius: $radius-round;
+  margin-left: auto;
+}
+
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
@@ -174,6 +259,42 @@
   border-left: 2rpx dashed $color-border;
   position: relative;
   margin-top: 4rpx;
+}
+
+.treeRoot {
+  margin-bottom: $spacing-lg;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.mainTreeLabel {
+  font-size: 24rpx;
+  font-weight: $font-weight-semibold;
+  color: $color-primary-light;
+  margin-bottom: $spacing-sm;
+  padding-left: $spacing-sm;
+}
+
+.orphanTreeLabel {
+  font-size: 22rpx;
+  font-weight: $font-weight-medium;
+  color: #9D6BFF;
+  margin-bottom: $spacing-sm;
+  padding-left: $spacing-sm;
+}
+
+.confluenceHint {
+  margin-left: 48rpx;
+  padding: $spacing-xs $spacing-md;
+  margin-top: 4rpx;
+}
+
+.confluenceHintText {
+  font-size: 18rpx;
+  color: $color-text-tertiary;
+  font-style: italic;
 }
 
 .childBranch {

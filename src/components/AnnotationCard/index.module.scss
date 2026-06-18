@@ -244,3 +244,62 @@
   background: rgba(123, 58, 237, 0.1);
   color: $color-primary-light;
 }
+
+.delBtn {
+  @include button-reset;
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: $radius-round;
+  background: rgba(255, 59, 92, 0.1);
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:active {
+    background: rgba(255, 59, 92, 0.2);
+  }
+}
+
+.linkedHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+}
+
+.addLinkBtn {
+  @include button-reset;
+  height: 52rpx;
+  padding: 0 $spacing-sm;
+  border-radius: $radius-button;
+  background: rgba(123, 58, 237, 0.15);
+  color: $color-primary-light;
+  font-size: 20rpx;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    background: rgba(123, 58, 237, 0.25);
+  }
+}
+
+.removeBtn {
+  @include button-reset;
+  height: 44rpx;
+  padding: 0 $spacing-xs;
+  border-radius: $radius-sm;
+  background: rgba(255, 59, 92, 0.1);
+  color: $emotion-scream;
+  font-size: 18rpx;
+  font-weight: $font-weight-medium;
+  flex-shrink: 0;
+
+  &:active {
+    background: rgba(255, 59, 92, 0.2);
+  }
+}
+
+.linkedList {
+  max-height: 400rpx;
+  overflow-y: auto;
+}

@@ -691,3 +691,81 @@
     box-shadow: none;
   }
 }
+
+/* ========== 对比模式 ========== */
+.compareToggle {
+  @include button-reset;
+  height: 64rpx;
+  padding: 0 $spacing-md;
+  border-radius: $radius-button;
+  background: $color-bg-card;
+  border: 2rpx solid $color-border;
+  color: $color-text-secondary;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+
+  &:active {
+    opacity: 0.8;
+  }
+}
+
+.compareActive {
+  background: rgba(123, 58, 237, 0.15);
+  border-color: $color-primary;
+  color: $color-primary-light;
+}
+
+.compareBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  border: 2rpx solid rgba(123, 58, 237, 0.2);
+  padding: $spacing-sm $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.compareInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.compareInfoText {
+  display: block;
+  font-size: 22rpx;
+  color: $color-text-secondary;
+  margin-bottom: 4rpx;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.compareStart {
+  @include button-reset;
+  height: 64rpx;
+  padding: 0 $spacing-md;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  color: $color-text-white;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  flex-shrink: 0;
+  margin-left: $spacing-sm;
+
+  &.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+}
+
+.compareSheet {
+  max-height: 90vh;
+  padding: 0;
+  background: $color-bg-card;
+
+  :global(*) {
+    box-sizing: border-box;
+  }
+}

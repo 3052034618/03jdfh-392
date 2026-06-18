@@ -9,6 +9,7 @@ import PerformanceTag from '@/components/PerformanceTag';
 import EmotionCurve from '@/components/EmotionCurve';
 import Recorder from '@/components/Recorder';
 import TrackCard from '@/components/TrackCard';
+import TrackCompare from '@/components/TrackCompare';
 import { collectPath, buildEmotionCurve, getEmotionColor, formatDuration, formatRelative } from '@/utils/emotion';
 
 type PageMode = 'rehearse' | 'tracks';
@@ -16,8 +17,6 @@ type PageMode = 'rehearse' | 'tracks';
 const RehearsalPage: React.FC = () => {
   const {
     project,
-    rehearsalNodeId,
-    setRehearsalNodeId,
     markRecorded,
     getAnnotationsByDialogue,
     saveRehearsalTrack,
@@ -28,11 +27,14 @@ const RehearsalPage: React.FC = () => {
   const [choiceMap, setChoiceMap] = useState<Record<string, string>>({});
   const [choiceIdMap, setChoiceIdMap] = useState<Record<string, string>>({});
   const [pathIdx, setPathIdx] = useState(0);
-  const [justRecorded, setJustRecorded] = useState(false);
   const [recordedInSession, setRecordedInSession] = useState<string[]>([]);
   const [showSaveSheet, setShowSaveSheet] = useState(false);
   const [actorName, setActorName] = useState('');
   const [trackNote, setTrackNote] = useState('');
+  const [compareMode, setCompareMode] = useState(false);
+  const [selectedTrackAId, setSelectedTrackAId] = useState<string | null>(null);
+  const [selectedTrackBId, setSelectedTrackBId] = useState<string | null>(null);
+  const [showCompare, setShowCompare] = useState(false);
 
   const currentPath = useMemo(() => {
     return collectPath(project.nodes, project.startNodeId, choiceMap);
@@ -57,7 +59,6 @@ const RehearsalPage: React.FC = () => {
   const goPrev = () => {
     if (pathIdx > 0) {
       setPathIdx(pathIdx - 1);
-      setJustRecorded(false);
     }
   };
 
@@ -68,7 +69,6 @@ const RehearsalPage: React.FC = () => {
     }
     if (pathIdx < currentPath.length - 1) {
       setPathIdx(pathIdx + 1);
-      setJustRecorded(false);
     }
   };
 
@@ -77,7 +77,6 @@ const RehearsalPage: React.FC = () => {
     setChoiceIdMap(prev => ({ ...prev, [currentNode!.id]: choice.id }));
     setTimeout(() => {
       setPathIdx(p => p + 1);
-      setJustRecorded(false);
     }, 80);
   };
 
@@ -87,7 +86,6 @@ const RehearsalPage: React.FC = () => {
       setRecordedInSession(prev => 
         prev.includes(currentNode.id) ? prev : [...prev, currentNode.id]
       );
-      setJustRecorded(true);
       Taro.showToast({ title: `已保存（${duration}秒）`, icon: 'success' });
     }
   };
@@ -96,14 +94,12 @@ const RehearsalPage: React.FC = () => {
     setChoiceMap({});
     setChoiceIdMap({});
     setPathIdx(0);
-    setJustRecorded(false);
     setRecordedInSession([]);
     Taro.showToast({ title: '已重置排练路径', icon: 'none' });
   };
 
   const jumpToStart = () => {
     setPathIdx(0);
-    setJustRecorded(false);
   };
 
   const handleFinishAndSave = () => {
@@ -119,7 +115,7 @@ const RehearsalPage: React.FC = () => {
       Taro.showToast({ title: '请输入演员姓名', icon: 'none' });
       return;
     }
-    const trackId = saveRehearsalTrack({
+    saveRehearsalTrack({
       pathNodeIds: currentPath.map(n => n.id),
       choices: choiceIdMap,
       recordedNodeIds: recordedInSession,
@@ -161,6 +157,31 @@ const RehearsalPage: React.FC = () => {
   const handleDeleteTrack = () => {
     // 刷新列表
   };
+
+  const handleSelectTrackA = (trackId: string) => {
+    setSelectedTrackAId(prev => prev === trackId ? null : trackId);
+  };
+
+  const handleSelectTrackB = (trackId: string) => {
+    setSelectedTrackBId(prev => prev === trackId ? null : trackId);
+  };
+
+  const startCompare = () => {
+    if (!selectedTrackAId || !selectedTrackBId) {
+      Taro.showToast({ title: '请先选择两条轨迹', icon: 'none' });
+      return;
+    }
+    setShowCompare(true);
+  };
+
+  const toggleCompareMode = () => {
+    setCompareMode(prev => !prev);
+    setSelectedTrackAId(null);
+    setSelectedTrackBId(null);
+  };
+
+  const selectedTrackA = rehearsalTracks.find(t => t.id === selectedTrackAId);
+  const selectedTrackB = rehearsalTracks.find(t => t.id === selectedTrackBId);
 
   if (!currentNode) {
     return (
@@ -208,11 +229,44 @@ const RehearsalPage: React.FC = () => {
         {pageMode === 'tracks' ? (
           <View>
             <View className={styles.tracksHeader}>
-              <Text className={styles.tracksTitle}>排练轨迹记录</Text>
-              <Text className={styles.tracksSub}>
-                每次从开头走到结尾后生成一条记录，可回看或继续录
-              </Text>
+              <View>
+                <Text className={styles.tracksTitle}>排练轨迹记录</Text>
+                <Text className={styles.tracksSub}>
+                  每次从开头走到结尾后生成一条记录，可回看或继续录
+                </Text>
+              </View>
+              <View style={{ display: 'flex', gap: '16rpx' }}>
+                <Button
+                  className={classnames(styles.compareToggle, compareMode && styles.compareActive)}
+                  onClick={toggleCompareMode}
+                >
+                  {compareMode ? '取消对比' : '🔍 对比'}
+                </Button>
+              </View>
             </View>
+
+            {compareMode && rehearsalTracks.length >= 2 && (
+              <View className={styles.compareBar}>
+                <View className={styles.compareInfo}>
+                  <Text className={styles.compareInfoText}>
+                    已选 A: {selectedTrackA?.title || '未选择'}
+                  </Text>
+                  <Text className={styles.compareInfoText}>
+                    已选 B: {selectedTrackB?.title || '未选择'}
+                  </Text>
+                </View>
+                <Button
+                  className={classnames(
+                    styles.compareStart,
+                    (!selectedTrackAId || !selectedTrackBId) && styles.disabled
+                  )}
+                  onClick={startCompare}
+                >
+                  开始对比 →
+                </Button>
+              </View>
+            )}
+
             {rehearsalTracks.length === 0 ? (
               <View className={styles.emptyTracks}>
                 <Text className={styles.emptyTracksIcon}>📭</Text>
@@ -228,6 +282,11 @@ const RehearsalPage: React.FC = () => {
                   track={track}
                   onResume={handleResumeTrack}
                   onDelete={handleDeleteTrack}
+                  compareMode={compareMode}
+                  selectedA={selectedTrackAId === track.id}
+                  selectedB={selectedTrackBId === track.id}
+                  onSelectA={handleSelectTrackA}
+                  onSelectB={handleSelectTrackB}
                 />
               ))
             )}
@@ -490,6 +549,19 @@ const RehearsalPage: React.FC = () => {
             >
               确认保存
             </Button>
+          </View>
+        </View>
+      )}
+
+      {/* 轨迹对比弹窗 */}
+      {showCompare && selectedTrackA && selectedTrackB && (
+        <View className={styles.modalMask} onClick={() => setShowCompare(false)}>
+          <View className={classnames(styles.modalSheet, styles.compareSheet)} onClick={e => e.stopPropagation()}>
+            <TrackCompare
+              trackA={selectedTrackA}
+              trackB={selectedTrackB}
+              onClose={() => setShowCompare(false)}
+            />
           </View>
         </View>
       )}
