@@ -4,6 +4,7 @@ import classnames from 'classnames';
 import styles from './index.module.scss';
 import { DialogueNode as NodeType } from '@/types/dialogue';
 import PerformanceTag from '@/components/PerformanceTag';
+import { formatDuration, formatRelative } from '@/utils/emotion';
 
 interface Props {
   node: NodeType;
@@ -14,6 +15,8 @@ interface Props {
 
 const DialogueNode: React.FC<Props> = ({ node, active = false, onClick, showChoices = true }) => {
   const annCount = (node.annotations || []).length;
+  const durationText = node.recorded && node.duration ? ` · ${formatDuration(node.duration)}` : '';
+  const lastText = node.recorded && node.lastRecordedAt ? `（${formatRelative(node.lastRecordedAt)}）` : '';
 
   return (
     <View
@@ -42,7 +45,7 @@ const DialogueNode: React.FC<Props> = ({ node, active = false, onClick, showChoi
             </View>
           )}
           {node.recorded ? (
-            <View className={styles.recordedBadge}>✅ 已录制</View>
+            <View className={styles.recordedBadge}>✅ 已录制{durationText}{lastText}</View>
           ) : (
             <View className={styles.pendingBadge}>⏳ 待录制</View>
           )}

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, Button, ScrollView, Textarea } from '@tarojs/components';
+import { View, Text, Button, ScrollView, Textarea, Input } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
@@ -9,7 +9,9 @@ import DialogueNode from '@/components/DialogueNode';
 import PerformanceTag from '@/components/PerformanceTag';
 import { performanceOptions } from '@/data/mockScript';
 
-const SCRIPT_PAGE = 'pages/script/index';
+type AttachMode = 'none' | 'linear' | 'choice';
+type EditorPanel = 'none' | 'add' | 'edit';
+type EditMode = 'text' | 'perf' | 'branch';
 
 const ScriptPage: React.FC = () => {
   const {
@@ -19,64 +21,138 @@ const ScriptPage: React.FC = () => {
     nodesList,
     updateNodePerformance,
     updateNodeText,
-    updateNodeChoices,
     setNextNode,
-    toggleRecorded
+    addChoice,
+    removeChoice,
+    updateChoice,
+    createNode
   } = useDialogue();
 
+  // 选中的节点（用于编辑）
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  const [editMode, setEditMode] = useState<'perf' | 'text' | 'branch'>('perf');
-  const [newIntensity, setNewIntensity] = useState<number>(5);
+  const [editMode, setEditMode] = useState<EditMode>('text');
 
-  const filteredNodes = useMemo(() => {
-    return nodesList.filter(n => n.role === currentCharacterId);
-  }, [nodesList, currentCharacterId]);
+  // 新增对白表单
+  const [showAddPanel, setShowAddPanel] = useState(false);
+  const [newText, setNewText] = useState('');
+  const [newPerfType, setNewPerfType] = useState<PerformanceType>('normal');
+  const [newPerfLabel, setNewPerfLabel] = useState('假装正常');
+  const [newIntensity, setNewIntensity] = useState(5);
+  const [attachMode, setAttachMode] = useState<AttachMode>('none');
+  const [attachParentId, setAttachParentId] = useState('');
+  const [attachChoiceText, setAttachChoiceText] = useState('');
 
-  const allNodesOfRole = nodesList.filter(n => n.role === currentCharacterId);
+  // 分支选择弹窗
+  const [targetPicker, setTargetPicker] = useState<null | {
+    context: 'linearNext' | 'attachParent' | 'choiceTarget';
+    nodeId?: string;
+    choiceId?: string;
+  }>(null);
+
+  const character = project.characters.find(c => c.id === currentCharacterId);
+  const filteredNodes = useMemo(
+    () => nodesList.filter(n => n.role === currentCharacterId),
+    [nodesList, currentCharacterId]
+  );
+  const allNodesOfRole = filteredNodes;
   const recordedCount = allNodesOfRole.filter(n => n.recorded).length;
   const branchCount = allNodesOfRole.filter(n => n.choices && n.choices.length > 0).length;
-
   const selectedNode: NodeType | null = selectedNodeId ? (project.nodes[selectedNodeId] || null) : null;
 
+  // 切换角色
   const switchCharacter = (id: string) => {
     setCurrentCharacterId(id);
     setSelectedNodeId(null);
   };
 
-  const selectPerformance = (type: PerformanceType, label: string, intensity?: number) => {
-    if (!selectedNodeId) return;
-    const perf: PerformanceHint = {
-      type,
-      label,
-      intensity: intensity ?? selectedNode?.performance.intensity ?? 5
-    };
-    updateNodePerformance(selectedNodeId, perf);
-    Taro.showToast({ title: '表演提示已更新', icon: 'success', duration: 1200 });
-  };
-
-  const handleIntensityChange = (v: number) => {
-    setNewIntensity(v);
-    if (selectedNodeId && selectedNode) {
-      const perf: PerformanceHint = {
-        ...selectedNode.performance,
-        intensity: v
-      };
-      updateNodePerformance(selectedNodeId, perf);
+  // 新增对白提交
+  const handleCreateNode = () => {
+    if (!newText.trim()) {
+      Taro.showToast({ title: '请输入台词内容', icon: 'none' });
+      return;
     }
+    if (attachMode !== 'none' && !attachParentId) {
+      Taro.showToast({ title: '请选择要连接的对白', icon: 'none' });
+      return;
+    }
+    if (attachMode === 'choice' && !attachChoiceText.trim()) {
+      Taro.showToast({ title: '请输入选项文案', icon: 'none' });
+      return;
+    }
+    const perf: PerformanceHint = {
+      type: newPerfType,
+      label: newPerfLabel,
+      intensity: newIntensity
+    };
+    const newId = createNode({
+      role: currentCharacterId,
+      character: character?.name || '未知角色',
+      text: newText.trim(),
+      performance: perf,
+      parentId: attachMode === 'none' ? undefined : attachParentId,
+      attachAs: attachMode === 'none' ? undefined : attachMode,
+      choiceText: attachMode === 'choice' ? attachChoiceText.trim() : undefined
+    });
+    Taro.showToast({ title: '对白已添加', icon: 'success' });
+    // 重置
+    setNewText('');
+    setNewIntensity(5);
+    setAttachMode('none');
+    setAttachParentId('');
+    setAttachChoiceText('');
+    setShowAddPanel(false);
+    setSelectedNodeId(newId);
   };
 
-  const handleTextChange = (v: string) => {
-    if (selectedNodeId) updateNodeText(selectedNodeId, v);
+  const selectPerfForNew = (type: PerformanceType, label: string) => {
+    setNewPerfType(type);
+    setNewPerfLabel(label);
   };
 
   const handleNodeClick = (n: NodeType) => {
     setSelectedNodeId(n.id);
-    setNewIntensity(n.performance.intensity);
+    setEditMode('text');
   };
 
-  const handleModeSwitch = (val: 'perf' | 'text' | 'branch') => {
-    setEditMode(val);
+  // 选择表演提示（编辑已有节点）
+  const selectPerformance = (type: PerformanceType, label: string) => {
+    if (!selectedNodeId) return;
+    const perf: PerformanceHint = {
+      type,
+      label,
+      intensity: selectedNode?.performance.intensity ?? 5
+    };
+    updateNodePerformance(selectedNodeId, perf);
   };
+
+  const handleIntensityChange = (v: number) => {
+    setNewIntensity(v);
+    if (selectedNodeId && selectedNode && editMode === 'perf') {
+      const perf: PerformanceHint = { ...selectedNode.performance, intensity: v };
+      updateNodePerformance(selectedNodeId, perf);
+    }
+  };
+
+  // 处理目标选择弹窗（选择某句对白 ID）
+  const pickTargetNode = (nodeId: string) => {
+    if (!targetPicker) return;
+    const ctx = targetPicker.context;
+    if (ctx === 'linearNext' && targetPicker.nodeId) {
+      setNextNode(targetPicker.nodeId, nodeId);
+    } else if (ctx === 'choiceTarget' && targetPicker.nodeId && targetPicker.choiceId) {
+      updateChoice(targetPicker.nodeId, targetPicker.choiceId, { nextNodeId: nodeId });
+    } else if (ctx === 'attachParent') {
+      setAttachParentId(nodeId);
+    }
+    setTargetPicker(null);
+    Taro.showToast({ title: '已设置', icon: 'success', duration: 1000 });
+  };
+
+  const openTargetPicker = (context: 'linearNext' | 'attachParent' | 'choiceTarget', nodeId?: string, choiceId?: string) => {
+    setTargetPicker({ context, nodeId, choiceId });
+  };
+
+  const currentIntensity = selectedNode ? selectedNode.performance.intensity : newIntensity;
 
   return (
     <ScrollView className={styles.page} scrollY>
@@ -118,7 +194,7 @@ const ScriptPage: React.FC = () => {
       <View className={styles.section}>
         <View className={styles.sectionTitle}>
           <Text className={styles.sectionText}>🎭 选择角色</Text>
-          <Button className={styles.addBtn}>+ 新增角色</Button>
+          <Button className={styles.addBtn} onClick={() => setShowAddPanel(true)}>+ 新增对白</Button>
         </View>
         <ScrollView className={styles.charTabs} scrollX enhanced showScrollbar={false}>
           {project.characters.map(ch => (
@@ -136,30 +212,168 @@ const ScriptPage: React.FC = () => {
         </ScrollView>
       </View>
 
-      {/* 选中节点编辑器 */}
-      {selectedNode && (
+      {/* ===== 新增对白表单 ===== */}
+      {showAddPanel && (
         <View className={styles.section}>
-          <View className={styles.sectionTitle}>
-            <Text className={styles.sectionText}>✏️ 编辑对白 #{selectedNode.id}</Text>
-            <Button
-              className={styles.ghostBtn}
-              onClick={() => setSelectedNodeId(null)}
-            >收起</Button>
-          </View>
           <View className={styles.editorCard}>
-            {/* 模式切换 */}
+            <View className={styles.cardHeader}>
+              <View>
+                <Text className={styles.cardTitle}>➕ 新增对白</Text>
+                <Text className={styles.cardSub}>角色：{character?.name}</Text>
+              </View>
+              <Button className={styles.closeBtn} onClick={() => setShowAddPanel(false)}>收起</Button>
+            </View>
+
+            <View className={styles.label}>台词内容</View>
+            <Textarea
+              className={styles.textarea}
+              value={newText}
+              onInput={e => setNewText(e.detail.value)}
+              placeholder="输入角色台词，如：（钥匙插入门锁）终于租到这么便宜的房子了..."
+              autoHeight
+              maxlength={500}
+            />
+
+            <View className={styles.label}>选择表演风格</View>
+            <View className={styles.perfSelector}>
+              <View className={styles.perfTags}>
+                {performanceOptions.map(opt => (
+                  <PerformanceTag
+                    key={opt.type}
+                    type={opt.type}
+                    label={opt.label}
+                    selectable
+                    selected={newPerfType === opt.type}
+                    onClick={() => selectPerfForNew(opt.type, opt.label)}
+                  />
+                ))}
+              </View>
+            </View>
+
+            <View className={styles.label}>情绪强度（{newIntensity}/10）</View>
+            <View className={styles.intensityRow} style={{ marginBottom: '32rpx' }}>
+              <Text className={styles.intensityLabel}>低张力</Text>
+              <View className={styles.sliderTrack}>
+                <View className={styles.sliderFill} style={{ width: `${(newIntensity / 10) * 100}%` }} />
+                <View className={styles.sliderPoints}>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(v => (
+                    <View
+                      key={v}
+                      className={classnames(styles.sliderDot, v <= newIntensity && styles.activeDot)}
+                      onClick={() => setNewIntensity(v)}
+                    />
+                  ))}
+                </View>
+              </View>
+              <Text className={styles.intensityValue}>{newIntensity}</Text>
+            </View>
+
+            <View className={styles.attachGroup}>
+              <View className={styles.label}>连接方式（保存后这句对白将出现在所选位置后面）</View>
+              <View className={styles.attachOptions}>
+                <Button
+                  className={classnames(styles.attachOption, attachMode === 'none' && styles.active)}
+                  onClick={() => { setAttachMode('none'); setAttachParentId(''); }}
+                >
+                  <Text className={styles.attachTitle}>不连接</Text>
+                  <Text className={styles.attachDesc}>作为独立节点</Text>
+                </Button>
+                <Button
+                  className={classnames(styles.attachOption, attachMode === 'linear' && styles.active)}
+                  onClick={() => setAttachMode('linear')}
+                >
+                  <Text className={styles.attachTitle}>接在某句后面</Text>
+                  <Text className={styles.attachDesc}>线性顺序</Text>
+                </Button>
+                <Button
+                  className={classnames(styles.attachOption, attachMode === 'choice' && styles.active)}
+                  onClick={() => setAttachMode('choice')}
+                >
+                  <Text className={styles.attachTitle}>作为分支选项</Text>
+                  <Text className={styles.attachDesc}>玩家选择后进入</Text>
+                </Button>
+              </View>
+
+              {attachMode !== 'none' && (
+                <>
+                  <View className={styles.labelRow}>
+                    <Text className={styles.label}>
+                      {attachMode === 'linear' ? '选择要接在后面的对白' : '选择父节点（有分支的对白）'}
+                    </Text>
+                    {attachParentId && (
+                      <Text style={{ fontSize: 20, color: '#9D6BFF' }}>已选 #{attachParentId}</Text>
+                    )}
+                  </View>
+                  <View className={styles.selectList}>
+                    {nodesList.length === 0 ? (
+                      <Text className={styles.emptyHint}>还没有对白可选</Text>
+                    ) : (
+                      nodesList.map(n => (
+                        <View
+                          key={n.id}
+                          className={classnames(styles.selectItem, attachParentId === n.id && styles.selected)}
+                          onClick={() => setAttachParentId(n.id)}
+                        >
+                          <View className={styles.selLeft}>
+                            <Text className={styles.selName}>#{n.id} · {n.character}</Text>
+                            <Text className={styles.selPreview}>{n.text}</Text>
+                          </View>
+                          <View className={classnames(styles.selCheck, attachParentId === n.id && styles.on)}>
+                            {attachParentId === n.id && '✓'}
+                          </View>
+                        </View>
+                      ))
+                    )}
+                  </View>
+                </>
+              )}
+
+              {attachMode === 'choice' && attachParentId && (
+                <>
+                  <View className={styles.label}>选项文案（玩家看到的选项）</View>
+                  <Input
+                    className={styles.input}
+                    value={attachChoiceText}
+                    onInput={e => setAttachChoiceText(e.detail.value)}
+                    placeholder="如：追问房东为什么不能开灯"
+                    maxlength={60}
+                  />
+                </>
+              )}
+            </View>
+
+            <Button
+              className={classnames(styles.primaryBtn, !newText.trim() && styles.disabled)}
+              onClick={handleCreateNode}
+            >✅ 保存并添加到剧本</Button>
+          </View>
+        </View>
+      )}
+
+      {/* ===== 选中节点编辑器 ===== */}
+      {selectedNode && !showAddPanel && (
+        <View className={styles.section}>
+          <View className={styles.editorCard}>
+            <View className={styles.cardHeader}>
+              <View>
+                <Text className={styles.cardTitle}>✏️ 编辑对白 #{selectedNode.id}</Text>
+                <Text className={styles.cardSub}>{selectedNode.character}</Text>
+              </View>
+              <Button className={styles.closeBtn} onClick={() => setSelectedNodeId(null)}>收起</Button>
+            </View>
+
             <View className={styles.modeSwitch}>
               <Button
                 className={classnames(styles.switchBtn, editMode === 'text' && styles.active)}
-                onClick={() => handleModeSwitch('text')}
+                onClick={() => setEditMode('text')}
               >📝 台词内容</Button>
               <Button
                 className={classnames(styles.switchBtn, editMode === 'perf' && styles.active)}
-                onClick={() => handleModeSwitch('perf')}
+                onClick={() => setEditMode('perf')}
               >🎭 表演提示</Button>
               <Button
                 className={classnames(styles.switchBtn, editMode === 'branch' && styles.active)}
-                onClick={() => handleModeSwitch('branch')}
+                onClick={() => setEditMode('branch')}
               >🔀 分支走向</Button>
             </View>
 
@@ -169,7 +383,7 @@ const ScriptPage: React.FC = () => {
                 <Textarea
                   className={styles.textarea}
                   value={selectedNode.text}
-                  onInput={(e) => handleTextChange(e.detail.value)}
+                  onInput={e => updateNodeText(selectedNode.id, e.detail.value)}
                   placeholder="输入角色台词..."
                   autoHeight
                   maxlength={500}
@@ -179,7 +393,7 @@ const ScriptPage: React.FC = () => {
 
             {editMode === 'perf' && (
               <View className={styles.perfSelector}>
-                <View className={styles.label}>选择表演风格（点击切换）</View>
+                <View className={styles.label}>选择表演风格</View>
                 <View className={styles.perfTags}>
                   {performanceOptions.map(opt => (
                     <PerformanceTag
@@ -192,25 +406,22 @@ const ScriptPage: React.FC = () => {
                     />
                   ))}
                 </View>
-                <View className={styles.label}>情绪强度（{newIntensity}/10）</View>
+                <View className={styles.label}>情绪强度（{currentIntensity}/10）</View>
                 <View className={styles.intensityRow}>
                   <Text className={styles.intensityLabel}>低张力</Text>
                   <View className={styles.sliderTrack}>
-                    <View
-                      className={styles.sliderFill}
-                      style={{ width: `${(newIntensity / 10) * 100}%` }}
-                    />
+                    <View className={styles.sliderFill} style={{ width: `${(currentIntensity / 10) * 100}%` }} />
                     <View className={styles.sliderPoints}>
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(v => (
                         <View
                           key={v}
-                          className={classnames(styles.sliderDot, v <= newIntensity && styles.activeDot)}
+                          className={classnames(styles.sliderDot, v <= currentIntensity && styles.activeDot)}
                           onClick={() => handleIntensityChange(v)}
                         />
                       ))}
                     </View>
                   </View>
-                  <Text className={styles.intensityValue}>{newIntensity}</Text>
+                  <Text className={styles.intensityValue}>{currentIntensity}</Text>
                 </View>
               </View>
             )}
@@ -219,36 +430,76 @@ const ScriptPage: React.FC = () => {
               <View className={styles.branchSection}>
                 {selectedNode.choices && selectedNode.choices.length > 0 ? (
                   <>
-                    <View className={styles.label}>玩家选择分支（{selectedNode.choices.length}条）</View>
+                    <View className={styles.label}>
+                      玩家分支选项（可修改文案、选择跳转目标、增删选项）
+                    </View>
                     <View className={styles.choiceList}>
                       {selectedNode.choices.map((ch: BranchChoice, idx: number) => (
-                        <View className={styles.choiceRow} key={ch.id}>
-                          <View className={styles.choiceIdx}>{String.fromCharCode(65 + idx)}</View>
-                          <Text className={styles.choiceText}>{ch.text}</Text>
-                          <View className={styles.choiceTarget}>→ #{ch.nextNodeId}</View>
+                        <View key={ch.id} className={styles.choiceEditor}>
+                          <View className={styles.choiceHeader}>
+                            <Text className={styles.choiceIdx}>选项 {String.fromCharCode(65 + idx)}</Text>
+                            <Button
+                              className={styles.choiceDel}
+                              onClick={() => {
+                                Taro.showModal({
+                                  title: '删除选项',
+                                  content: '确定要删除这个分支选项吗？',
+                                  success: (res) => {
+                                    if (res.confirm) removeChoice(selectedNode.id, ch.id);
+                                  }
+                                });
+                              }}
+                            >删除</Button>
+                          </View>
+                          <Input
+                            className={styles.choiceInput}
+                            value={ch.text}
+                            placeholder="输入玩家看到的选项文案"
+                            onInput={e => updateChoice(selectedNode.id, ch.id, { text: e.detail.value })}
+                            maxlength={80}
+                          />
+                          <View className={styles.choiceTargetRow}>
+                            <Button
+                              className={styles.choiceTargetBtn}
+                              onClick={() => openTargetPicker('choiceTarget', selectedNode.id, ch.id)}
+                            >
+                              <Text>
+                                {ch.nextNodeId ? `跳转到 → #${ch.nextNodeId}` : '点击选择跳转到哪句对白'}
+                              </Text>
+                              <Text>›</Text>
+                            </Button>
+                          </View>
                         </View>
                       ))}
                     </View>
+                    <Button
+                      className={styles.choiceAddBtn}
+                      onClick={() => addChoice(selectedNode.id)}
+                      style={{ width: '100%', height: '72rpx', marginTop: '16rpx' }}
+                    >+ 新增分支选项</Button>
                   </>
-                ) : selectedNode.nextNodeId ? (
+                ) : (
                   <>
                     <View className={styles.label}>线性走向</View>
-                    <View className={styles.choiceRow}>
-                      <View className={styles.choiceIdx}>→</View>
-                      <Text className={styles.choiceText}>直接进入下一句</Text>
-                      <View className={styles.choiceTarget}>#{selectedNode.nextNodeId}</View>
+                    <View className={styles.linearTarget}>
+                      <Button
+                        className={styles.choiceTargetBtn}
+                        onClick={() => openTargetPicker('linearNext', selectedNode.id)}
+                      >
+                        <Text>
+                          {selectedNode.nextNodeId
+                            ? `下一句 → #${selectedNode.nextNodeId}（点击修改）`
+                            : '点击设置下一句对白'}
+                        </Text>
+                        <Text>›</Text>
+                      </Button>
                     </View>
                     <Button
                       className={styles.ghostBtn}
-                      style={{ marginTop: '24rpx' }}
-                      onClick={() => updateNodeChoices(selectedNode.id, [
-                        { id: `ch-new-1`, text: '选项A', nextNodeId: selectedNode.nextNodeId! },
-                        { id: `ch-new-2`, text: '选项B', nextNodeId: selectedNode.nextNodeId! }
-                      ])}
-                    >转为分支模式</Button>
+                      style={{ marginTop: '16rpx', width: '100%', height: '72rpx' }}
+                      onClick={() => addChoice(selectedNode.id)}
+                    >+ 转为分支模式（新增一个选项）</Button>
                   </>
-                ) : (
-                  <Text className={styles.label}>🎬 这是一条路径的终点</Text>
                 )}
               </View>
             )}
@@ -264,7 +515,9 @@ const ScriptPage: React.FC = () => {
         </View>
         {filteredNodes.length === 0 ? (
           <View className={styles.editorCard}>
-            <Text style={{ color: '#6E6E8A', fontSize: '26rpx' }}>该角色暂无对白段落</Text>
+            <Text style={{ color: '#6E6E8A', fontSize: '26rpx' }}>
+              该角色暂无对白段落，点击右上角"+ 新增对白"开始创作
+            </Text>
           </View>
         ) : (
           filteredNodes.map(node => (
@@ -279,12 +532,70 @@ const ScriptPage: React.FC = () => {
       </View>
 
       {/* 悬浮新增按钮 */}
-      <View
-        className={styles.fab}
-        onClick={() => Taro.showToast({ title: '新增对白', icon: 'none' })}
-      >
-        <Text className={styles.fabIcon}>+</Text>
-      </View>
+      {!showAddPanel && (
+        <View className={styles.fab} onClick={() => setShowAddPanel(true)}>
+          <Text className={styles.fabIcon}>+</Text>
+        </View>
+      )}
+
+      {/* 目标节点选择弹窗（底部 sheet） */}
+      {targetPicker && (
+        <View className={styles.modalMask} onClick={() => setTargetPicker(null)}>
+          <View className={styles.modalSheet} onClick={e => e.stopPropagation()}>
+            <View className={styles.modalHeader}>
+              <Text className={styles.modalTitle}>
+                {targetPicker.context === 'linearNext' && '选择下一句对白'}
+                {targetPicker.context === 'choiceTarget' && '选择分支要跳转到的对白'}
+                {targetPicker.context === 'attachParent' && '选择父对白'}
+              </Text>
+              <Button className={styles.closeBtn} onClick={() => setTargetPicker(null)}>取消</Button>
+            </View>
+            <ScrollView className={styles.modalList} scrollY>
+              {nodesList.length === 0 && (
+                <Text className={styles.emptyHint} style={{ padding: '32rpx' }}>还没有对白</Text>
+              )}
+              {nodesList.map(n => {
+                const curSelected =
+                  (targetPicker.context === 'linearNext' && targetPicker.nodeId && project.nodes[targetPicker.nodeId]?.nextNodeId === n.id) ||
+                  (targetPicker.context === 'choiceTarget' && targetPicker.nodeId && targetPicker.choiceId &&
+                    project.nodes[targetPicker.nodeId]?.choices?.find(c => c.id === targetPicker.choiceId)?.nextNodeId === n.id) ||
+                  (targetPicker.context === 'attachParent' && attachParentId === n.id);
+                return (
+                  <View
+                    key={n.id}
+                    className={styles.modalItem}
+                    onClick={() => pickTargetNode(n.id)}
+                  >
+                    <View className={styles.modalItemTop}>
+                      <View style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1, minWidth: 0 }}>
+                        <Text style={{ fontSize: 24, fontWeight: 600, color: curSelected ? '#9D6BFF' : '#E8E8F0' }}>
+                          #{n.id}
+                        </Text>
+                        <Text style={{ fontSize: 22, color: '#9E9EB0' }}>{n.character}</Text>
+                      </View>
+                      {curSelected && (
+                        <Text style={{ color: '#9D6BFF', fontSize: 22, fontWeight: 600 }}>✓ 当前</Text>
+                      )}
+                    </View>
+                    <Text
+                      style={{
+                        fontSize: 24,
+                        color: '#9E9EB0',
+                        marginTop: 8,
+                        lineHeight: 1.5,
+                        display: '-webkit-box',
+                        overflow: 'hidden',
+                        WebkitBoxOrient: 'vertical',
+                        WebkitLineClamp: 2
+                      }}
+                    >{n.text}</Text>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
+      )}
     </ScrollView>
   );
 };

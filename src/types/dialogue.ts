@@ -38,6 +38,13 @@ export interface DialogueNode {
   annotations?: Annotation[];
   recorded?: boolean;
   duration?: number;
+  lastRecordedAt?: number;
+}
+
+export interface PersistState {
+  project: ScriptProject;
+  currentCharacterId: string;
+  rehearsalNodeId: string;
 }
 
 export interface Character {

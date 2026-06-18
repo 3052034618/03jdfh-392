@@ -8,14 +8,14 @@ import { DialogueNode, BranchChoice, Annotation } from '@/types/dialogue';
 import PerformanceTag from '@/components/PerformanceTag';
 import EmotionCurve from '@/components/EmotionCurve';
 import Recorder from '@/components/Recorder';
-import { collectPath, buildEmotionCurve, getEmotionColor } from '@/utils/emotion';
+import { collectPath, buildEmotionCurve, getEmotionColor, formatDuration, formatRelative } from '@/utils/emotion';
 
 const RehearsalPage: React.FC = () => {
   const {
     project,
     rehearsalNodeId,
     setRehearsalNodeId,
-    toggleRecorded,
+    markRecorded,
     getAnnotationsByDialogue
   } = useDialogue();
 
@@ -74,7 +74,7 @@ const RehearsalPage: React.FC = () => {
 
   const handleRecordComplete = (duration: number) => {
     if (currentNode) {
-      toggleRecorded(currentNode.id);
+      markRecorded(currentNode.id, duration);
       setJustRecorded(true);
       Taro.showToast({ title: `已保存（${duration}秒）`, icon: 'success' });
     }
@@ -235,7 +235,11 @@ const RehearsalPage: React.FC = () => {
                 color: '#2FD4A6',
                 fontWeight: 500
               }}
-            >✅ 已录制 {justRecorded ? '(刚刚)' : ''}</Text>
+            >
+              ✅ 已录制
+              {currentNode.duration ? ` · ${formatDuration(currentNode.duration)}` : ''}
+              {currentNode.lastRecordedAt ? `（${formatRelative(currentNode.lastRecordedAt)}）` : ''}
+            </Text>
           )}
         </View>
       </View>

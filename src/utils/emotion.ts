@@ -108,3 +108,20 @@ export const formatTime = (ts: number): string => {
   const mi = String(date.getMinutes()).padStart(2, '0');
   return `${mm}-${dd} ${hh}:${mi}`;
 };
+
+// 格式化录制时长（秒 → mm:ss）
+export const formatDuration = (seconds: number): string => {
+  if (!seconds || seconds < 0) return '0:00';
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+};
+
+// 格式化相对时间（多久之前）
+export const formatRelative = (ts: number): string => {
+  const diff = Date.now() - ts;
+  if (diff < 60_000) return '刚刚';
+  if (diff < 3600_000) return `${Math.floor(diff / 60_000)}分钟前`;
+  if (diff < 86400_000) return `${Math.floor(diff / 3600_000)}小时前`;
+  return formatTime(ts);
+};

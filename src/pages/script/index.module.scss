@@ -85,6 +85,12 @@
   color: $color-text-primary;
 }
 
+.subText {
+  font-size: 22rpx;
+  color: $color-text-tertiary;
+  margin-top: 4rpx;
+}
+
 .addBtn {
   @include button-reset;
   height: 56rpx;
@@ -155,6 +161,8 @@
   color: $color-primary-light;
 }
 
+/* ========== 编辑器区域通用样式 ==========
+
 .editorCard {
   background: $color-bg-card;
   border-radius: $radius-lg;
@@ -163,11 +171,52 @@
   margin-bottom: $spacing-md;
 }
 
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.cardTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.cardSub {
+  font-size: 22rpx;
+  color: $color-text-tertiary;
+}
+
+.closeBtn {
+  @include button-reset;
+  height: 48rpx;
+  padding: 0 $spacing-md;
+  border-radius: $radius-button;
+  background: transparent;
+  border: 2rpx solid $color-border;
+  color: $color-text-tertiary;
+  font-size: 22rpx;
+
+  &:active {
+    border-color: $color-primary;
+    color: $color-primary-light;
+  }
+}
+
 .label {
   font-size: $font-size-xs;
   color: $color-text-tertiary;
   margin-bottom: $spacing-xs;
   font-weight: $font-weight-medium;
+}
+
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: $spacing-xs;
 }
 
 .textarea {
@@ -186,6 +235,33 @@
   &:focus {
     border-color: $color-primary;
   }
+}
+
+.input {
+  width: 100%;
+  height: 80rpx;
+  padding: 0 $spacing-md;
+  background: $color-bg-input;
+  border-radius: $radius-md;
+  border: 2rpx solid $color-border;
+  color: $color-text-primary;
+  font-size: $font-size-md;
+  box-sizing: border-box;
+  margin-bottom: $spacing-lg;
+
+  &:focus {
+    border-color: $color-primary;
+  }
+}
+
+.row {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+}
+
+.field {
+  flex: 1;
 }
 
 .perfSelector {
@@ -263,6 +339,143 @@
   text-align: right;
 }
 
+/* 连接方式 */
+.attachGroup {
+  margin-bottom: $spacing-lg;
+}
+
+.attachOptions {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.attachOption {
+  @include button-reset;
+  flex: 1;
+  height: 80rpx;
+  padding: 0 $spacing-md;
+  border-radius: $radius-md;
+  background: $color-bg-hover;
+  border: 2rpx solid $color-border;
+  color: $color-text-tertiary;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+
+  &.active {
+    background: rgba(123, 58, 237, 0.12);
+    border-color: $color-primary;
+    color: $color-primary-light;
+  }
+}
+
+.attachTitle {
+  font-size: 24rpx;
+  color: $color-text-secondary;
+}
+
+.attachDesc {
+  font-size: 18rpx;
+  color: $color-text-tertiary;
+}
+
+.selectList {
+  max-height: 320rpx;
+  overflow-y: auto;
+  padding: $spacing-sm;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+}
+
+.selectItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-sm;
+  margin-bottom: 4rpx;
+  transition: all $transition-fast;
+
+  &:active {
+    background: rgba(123, 58, 237, 0.08);
+  }
+
+  &.selected {
+    background: rgba(123, 58, 237, 0.15);
+    border: 2rpx solid rgba(123, 58, 237, 0.3);
+  }
+}
+
+.selLeft {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rpx;
+}
+
+.selName {
+  font-size: 22rpx;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.selPreview {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  @include text-ellipsis;
+}
+
+.selCheck {
+  width: 32rpx;
+  height: 32rpx;
+  border-radius: $radius-round;
+  border: 3rpx solid $color-border;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-white;
+  background: transparent;
+  font-size: 18rpx;
+
+  &.on {
+    background: $color-primary;
+    border-color: $color-primary;
+  }
+}
+
+/* 按钮 */
+.primaryBtn {
+  @include button-reset;
+  width: 100%;
+  height: 88rpx;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  color: $color-text-white;
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  box-shadow: 0 4rpx 16rpx rgba(123, 58, 237, 0.3);
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
+
+  &.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+    box-shadow: none;
+  }
+}
+
+/* ========== 分支编辑 ==========
+
 .branchSection {
   padding-top: $spacing-md;
   border-top: 2rpx dashed $color-border;
@@ -293,54 +506,97 @@
   }
 }
 
+.choiceEditor {
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-sm;
+  border: 2rpx solid $color-border;
+}
+
+.choiceHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-sm;
+}
+
+.choiceIdx {
+  font-size: 24rpx;
+  font-weight: $font-weight-semibold;
+  color: $color-primary-light;
+}
+
+.choiceDel {
+  @include button-reset;
+  height: 48rpx;
+  padding: 0 $spacing-sm;
+  border-radius: $radius-xs;
+  background: transparent;
+  color: $emotion-scream;
+  font-size: 22rpx;
+
+  &:active {
+    background: rgba(255, 59, 92, 0.1);
+  }
+}
+
+.choiceInput {
+  width: 100%;
+  height: 72rpx;
+  padding: 0 $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-sm;
+  border: 2rpx solid $color-border;
+  color: $color-text-primary;
+  font-size: $font-size-sm;
+  box-sizing: border-box;
+  margin-bottom: $spacing-sm;
+}
+
+.choiceTargetRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.choiceTargetBtn {
+  @include button-reset;
+  flex: 1;
+  height: 72rpx;
+  padding: 0 $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-sm;
+  border: 2rpx solid $color-border;
+  color: $color-text-secondary;
+  font-size: 22rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &:active {
+    border-color: $color-primary;
+    color: $color-primary-light;
+  }
+}
+
+.choiceAddBtn {
+  @include button-reset;
+  height: 72rpx;
+  width: 72rpx;
+  border-radius: $radius-sm;
+  background: rgba(123, 58, 237, 0.12);
+  border: 2rpx dashed $color-primary;
+  color: $color-primary-light;
+  font-size: 32rpx;
+  font-weight: $font-weight-light;
+  margin-top: $spacing-xs;
+}
+
 .choiceList {
   display: flex;
   flex-direction: column;
   gap: $spacing-sm;
-}
-
-.choiceRow {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  padding: $spacing-sm $spacing-md;
-  background: $color-bg-hover;
-  border-radius: $radius-md;
-  border: 2rpx solid transparent;
-
-  &:active {
-    border-color: rgba(123, 58, 237, 0.3);
-  }
-}
-
-.choiceIdx {
-  width: 48rpx;
-  height: 48rpx;
-  border-radius: $radius-round;
-  background: rgba(123, 58, 237, 0.15);
-  color: $color-primary-light;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: $font-size-xs;
-  font-weight: $font-weight-semibold;
-  flex-shrink: 0;
-}
-
-.choiceText {
-  flex: 1;
-  font-size: 24rpx;
-  color: $color-text-secondary;
-  @include text-ellipsis;
-}
-
-.choiceTarget {
-  font-size: 20rpx;
-  color: $color-text-tertiary;
-  padding: 4rpx 12rpx;
-  background: $color-bg-card;
-  border-radius: $radius-xs;
-  flex-shrink: 0;
 }
 
 .fab {
@@ -391,4 +647,78 @@
     border-color: $color-primary;
     color: $color-primary-light;
   }
+}
+
+.linearTarget {
+  padding: $spacing-md;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-sm;
+}
+
+.emptyHint {
+  font-size: 24rpx;
+  color: $color-text-tertiary;
+  padding: $spacing-sm;
+}
+
+/* 弹窗遮罩 */
+.modalMask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 200;
+}
+
+.modalSheet {
+  width: 100%;
+  background: $color-bg-card;
+  border-top-left-radius: $radius-lg;
+  border-top-right-radius: $radius-lg;
+  padding: $spacing-lg $spacing-lg;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.modalTitle {
+  font-size: $font-size-lg;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.modalList {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.modalItem {
+  padding: $spacing-md;
+  border-bottom: 2rpx solid $color-divider;
+
+  &:active {
+    background: rgba(123, 58, 237, 0.06);
+  }
+}
+
+.modalItemTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+}
+
+.modalItemRole {
+  display: flex;
+  flex: 1;
 }

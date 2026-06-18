@@ -79,6 +79,77 @@
   color: $color-primary-light;
 }
 
+/* 角色切换 tab（同剧本导入页风格） */
+.section {
+  margin-bottom: $spacing-lg;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.sectionText {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.charTabs {
+  @include scroll-x-container;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-sm;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.charTab {
+  @include scroll-x-item(auto);
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-lg;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  border: 2rpx solid $color-border;
+  margin-right: $spacing-sm;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.activeTab {
+  border-color: $color-primary;
+  background: rgba(123, 58, 237, 0.12);
+  box-shadow: 0 0 16rpx rgba(123, 58, 237, 0.2);
+}
+
+.charAvatar {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-white;
+  font-size: 20rpx;
+  font-weight: $font-weight-semibold;
+}
+
+.charName {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.activeTab .charName {
+  color: $color-primary-light;
+}
+
 /* 选中台词快速面板 */
 .selectPanel {
   background: $color-bg-card;

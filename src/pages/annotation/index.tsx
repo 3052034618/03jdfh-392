@@ -24,11 +24,13 @@ const AnnotationPage: React.FC = () => {
   const {
     project,
     nodesList,
-    currentCharacterId,
+    setCurrentCharacterId,
     annotations,
     addAnnotation
   } = useDialogue();
 
+  // 本页独立角色过滤（不依赖全局）
+  const [localRoleId, setLocalRoleId] = useState<string>('all');
   const [filter, setFilter] = useState<FilterType>('all');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [content, setContent] = useState('');
@@ -53,9 +55,11 @@ const AnnotationPage: React.FC = () => {
     return list;
   }, [annotations, filter, project.nodes]);
 
+  // 本页可选台词：按 localRoleId 过滤，'all' 显示全部
   const selectableNodes = useMemo(() => {
-    return nodesList.filter(n => n.role === currentCharacterId);
-  }, [nodesList, currentCharacterId]);
+    if (localRoleId === 'all') return nodesList;
+    return nodesList.filter(n => n.role === localRoleId);
+  }, [nodesList, localRoleId]);
 
   const toggleNodeSelect = (id: string) => {
     setSelectedIds(prev =>
@@ -76,22 +80,26 @@ const AnnotationPage: React.FC = () => {
       Taro.showToast({ title: '请至少选择一句台词', icon: 'none' });
       return;
     }
-    selectedIds.forEach(id => {
-      addAnnotation(id, content.trim(), author.trim() || '导演');
-    });
+    // 一次调用：向多个对白写入各自独立 id 的批注
+    addAnnotation(selectedIds, content.trim(), author.trim() || '导演');
     Taro.showToast({
-      title: `已提交 ${selectedIds.length} 条批注`,
+      title: `已提交批注`,
       icon: 'success'
     });
     setContent('');
     setSelectedIds([]);
   };
 
-  const currentChar = project.characters.find(c => c.id === currentCharacterId);
-
   const firstSelected: NodeType | undefined = selectedIds[0]
     ? project.nodes[selectedIds[0]]
     : undefined;
+
+  const switchLocalRole = (id: string) => {
+    setLocalRoleId(id);
+    setSelectedIds([]); // 切换角色清空已选，避免选中别的角色的台词
+    // 同步到全局方便排练页等保持一致
+    if (id !== 'all') setCurrentCharacterId(id);
+  };
 
   return (
     <ScrollView className={styles.page} scrollY>
@@ -102,13 +110,44 @@ const AnnotationPage: React.FC = () => {
         </Text>
       </View>
 
+      {/* 角色切换（本页独立） */}
+      <View className={styles.section}>
+        <View className={styles.sectionTitle}>
+          <Text className={styles.sectionText}>🎭 选择角色台词（可查看全部）</Text>
+        </View>
+        <ScrollView className={styles.charTabs} scrollX enhanced showScrollbar={false}>
+          <View
+            className={classnames(styles.charTab, localRoleId === 'all' && styles.activeTab)}
+            onClick={() => switchLocalRole('all')}
+          >
+            <View
+              className={styles.charAvatar}
+              style={{ background: 'linear-gradient(135deg, #9D6BFF, #FF3B5C)' }}
+            >全</View>
+            <Text className={styles.charName}>全部角色</Text>
+          </View>
+          {project.characters.map(ch => (
+            <View
+              key={ch.id}
+              className={classnames(styles.charTab, localRoleId === ch.id && styles.activeTab)}
+              onClick={() => switchLocalRole(ch.id)}
+            >
+              <View className={styles.charAvatar} style={{ background: ch.color }}>
+                {ch.name.slice(0, 1)}
+              </View>
+              <Text className={styles.charName}>{ch.name}</Text>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+
       {/* 筛选栏 */}
       <ScrollView className={styles.filterBar} scrollX enhanced showScrollbar={false}>
         <View
           className={classnames(styles.filterChip, filter === 'all' && styles.activeChip)}
           onClick={() => setFilter('all')}
         >
-          <Text className={styles.filterText}>全部</Text>
+          <Text className={styles.filterText}>全部批注</Text>
           <View className={styles.filterCount}>{annotations.length}</View>
         </View>
         <View
@@ -140,16 +179,17 @@ const AnnotationPage: React.FC = () => {
       {/* 选中台词面板 */}
       <View className={styles.selectPanel}>
         <View className={styles.panelLabel}>
-          选择要批注的台词（{currentChar?.name || ''}，可多选，当前选中 {selectedIds.length} 条）
+          选择要批注的台词（{localRoleId === 'all' ? '全部角色' : project.characters.find(c => c.id === localRoleId)?.name}，可多选，已选 {selectedIds.length} 条）
         </View>
         <ScrollView className={styles.selectList} scrollY>
           {selectableNodes.length === 0 ? (
             <Text style={{ color: '#6E6E8A', fontSize: '24rpx', padding: '24rpx' }}>
-              当前角色暂无对白
+              当前没有对白可选
             </Text>
           ) : (
             selectableNodes.map(node => {
               const checked = selectedIds.includes(node.id);
+              const ch = project.characters.find(c => c.id === node.role);
               return (
                 <View
                   key={node.id}
@@ -158,7 +198,7 @@ const AnnotationPage: React.FC = () => {
                 >
                   <View
                     className={styles.selAvatar}
-                    style={{ background: currentChar?.color || '#7B3AED' }}
+                    style={{ background: ch?.color || '#7B3AED' }}
                   >{node.character.slice(0, 1)}</View>
                   <View className={styles.selContent}>
                     <Text className={styles.selName}>#{node.id} · {node.character}</Text>
@@ -192,7 +232,7 @@ const AnnotationPage: React.FC = () => {
         {firstSelected && (
           <View className={styles.selectedQuote}>
             <Text className={styles.quoteIcon}>“</Text>
-            <Text className={styles.quoteName}>圈出：#{firstSelected.id} · {firstSelected.character}</Text>
+            <Text className={styles.quoteName}>圈出示例：#{firstSelected.id} · {firstSelected.character}</Text>
             <Text className={styles.quoteText}>{firstSelected.text}</Text>
           </View>
         )}
