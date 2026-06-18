@@ -1,0 +1,394 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding: $spacing-lg $page-padding 120rpx;
+}
+
+.header {
+  margin-bottom: $spacing-xl;
+}
+
+.projectTitle {
+  font-size: $font-size-xxl;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-xs;
+  background: linear-gradient(135deg, $color-primary-light 0%, $emotion-scream 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.projectMeta {
+  display: flex;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+  margin-bottom: $spacing-md;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.metaDot {
+  width: 8rpx;
+  height: 8rpx;
+  border-radius: $radius-round;
+  background: $color-primary;
+}
+
+.statBar {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.statCard {
+  flex: 1;
+  padding: $spacing-md;
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  border: 2rpx solid $color-border;
+}
+
+.statNum {
+  font-size: 36rpx;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  margin-bottom: 4rpx;
+}
+
+.statLabel {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+}
+
+.section {
+  margin-bottom: $spacing-xl;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.sectionText {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+}
+
+.addBtn {
+  @include button-reset;
+  height: 56rpx;
+  padding: 0 $spacing-lg;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  color: $color-text-white;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.96);
+    opacity: 0.9;
+  }
+}
+
+.charTabs {
+  @include scroll-x-container;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-sm;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.charTab {
+  @include scroll-x-item(auto);
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-lg;
+  background: $color-bg-card;
+  border-radius: $radius-button;
+  border: 2rpx solid $color-border;
+  margin-right: $spacing-sm;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.85;
+  }
+}
+
+.activeTab {
+  border-color: $color-primary;
+  background: rgba(123, 58, 237, 0.12);
+  box-shadow: 0 0 16rpx rgba(123, 58, 237, 0.2);
+}
+
+.charAvatar {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-white;
+  font-size: 20rpx;
+  font-weight: $font-weight-semibold;
+}
+
+.charName {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.activeTab .charName {
+  color: $color-primary-light;
+}
+
+.editorCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  border: 2rpx solid $color-border;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+}
+
+.label {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-xs;
+  font-weight: $font-weight-medium;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 160rpx;
+  padding: $spacing-md;
+  background: $color-bg-input;
+  border-radius: $radius-md;
+  border: 2rpx solid $color-border;
+  color: $color-text-primary;
+  font-size: $font-size-md;
+  line-height: 1.7;
+  box-sizing: border-box;
+  margin-bottom: $spacing-lg;
+
+  &:focus {
+    border-color: $color-primary;
+  }
+}
+
+.perfSelector {
+  margin-bottom: $spacing-lg;
+}
+
+.perfTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.intensityRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.intensityLabel {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+  min-width: 100rpx;
+}
+
+.sliderTrack {
+  flex: 1;
+  height: 8rpx;
+  background: $color-bg-hover;
+  border-radius: $radius-round;
+  position: relative;
+  overflow: visible;
+}
+
+.sliderFill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: $radius-round;
+  background: linear-gradient(90deg, $emotion-normal 0%, $color-primary 50%, $emotion-scream 100%);
+}
+
+.sliderPoints {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.sliderDot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: $radius-round;
+  background: $color-bg-card;
+  border: 3rpx solid $color-border;
+  transition: all $transition-fast;
+}
+
+.activeDot {
+  border-color: $emotion-scream;
+  background: $emotion-scream;
+  box-shadow: 0 0 12rpx $glow-danger;
+}
+
+.intensityValue {
+  font-size: 32rpx;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  min-width: 60rpx;
+  text-align: right;
+}
+
+.branchSection {
+  padding-top: $spacing-md;
+  border-top: 2rpx dashed $color-border;
+}
+
+.modeSwitch {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-md;
+}
+
+.switchBtn {
+  @include button-reset;
+  flex: 1;
+  height: 72rpx;
+  border-radius: $radius-md;
+  background: $color-bg-hover;
+  border: 2rpx solid $color-border;
+  color: $color-text-tertiary;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &.active {
+    background: rgba(123, 58, 237, 0.12);
+    border-color: $color-primary;
+    color: $color-primary-light;
+  }
+}
+
+.choiceList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.choiceRow {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  border: 2rpx solid transparent;
+
+  &:active {
+    border-color: rgba(123, 58, 237, 0.3);
+  }
+}
+
+.choiceIdx {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: $radius-round;
+  background: rgba(123, 58, 237, 0.15);
+  color: $color-primary-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  flex-shrink: 0;
+}
+
+.choiceText {
+  flex: 1;
+  font-size: 24rpx;
+  color: $color-text-secondary;
+  @include text-ellipsis;
+}
+
+.choiceTarget {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+  padding: 4rpx 12rpx;
+  background: $color-bg-card;
+  border-radius: $radius-xs;
+  flex-shrink: 0;
+}
+
+.fab {
+  position: fixed;
+  right: $page-padding;
+  bottom: 120rpx;
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: $radius-round;
+  background: linear-gradient(135deg, $color-primary 0%, $emotion-scream 100%);
+  box-shadow: 0 8rpx 32rpx rgba(123, 58, 237, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.92);
+  }
+}
+
+.fabIcon {
+  font-size: 56rpx;
+  color: $color-text-white;
+  font-weight: $font-weight-light;
+}
+
+.nodesTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.ghostBtn {
+  @include button-reset;
+  height: 56rpx;
+  padding: 0 $spacing-md;
+  border-radius: $radius-button;
+  background: transparent;
+  border: 2rpx solid $color-border;
+  color: $color-text-tertiary;
+  font-size: 22rpx;
+  transition: all $transition-base;
+
+  &:active {
+    border-color: $color-primary;
+    color: $color-primary-light;
+  }
+}

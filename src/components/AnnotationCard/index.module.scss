@@ -1,0 +1,145 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  border: 2rpx solid $color-border;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.995);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.avatar {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: $radius-round;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-white;
+  font-size: 22rpx;
+  font-weight: $font-weight-semibold;
+}
+
+.audioAvatar {
+  background: linear-gradient(135deg, $emotion-close 0%, $color-warning 100%);
+}
+
+.userName {
+  font-size: $font-size-sm;
+  color: $color-text-primary;
+  font-weight: $font-weight-medium;
+}
+
+.roleBadge {
+  font-size: 20rpx;
+  padding: 2rpx 12rpx;
+  border-radius: $radius-round;
+  margin-left: 6rpx;
+  background: rgba(123, 58, 237, 0.12);
+  color: $color-primary-light;
+}
+
+.time {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+}
+
+.dialogueRef {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  padding: $spacing-md;
+  background: rgba(47, 212, 166, 0.05);
+  border-left: 4rpx solid $emotion-normal;
+  border-radius: $radius-sm;
+  margin-bottom: $spacing-md;
+}
+
+.refLabel {
+  font-size: 20rpx;
+  color: $emotion-normal;
+  font-weight: $font-weight-medium;
+  min-width: 80rpx;
+}
+
+.refText {
+  font-size: 24rpx;
+  color: $color-text-secondary;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.content {
+  font-size: 26rpx;
+  color: $color-text-primary;
+  line-height: 1.75;
+  padding: $spacing-md;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  position: relative;
+}
+
+.quoteMark {
+  position: absolute;
+  top: -10rpx;
+  left: 16rpx;
+  font-size: 40rpx;
+  color: $color-primary;
+  opacity: 0.25;
+  font-family: Georgia, serif;
+}
+
+.keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  margin-top: $spacing-md;
+}
+
+.keyword {
+  font-size: 20rpx;
+  padding: 4rpx 14rpx;
+  border-radius: $radius-sm;
+  background: rgba(255, 200, 87, 0.1);
+  color: $emotion-close;
+  border: 2rpx solid rgba(255, 200, 87, 0.25);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 2rpx dashed $color-border;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  font-size: 20rpx;
+  padding: 6rpx 16rpx;
+  border-radius: $radius-round;
+  background: rgba(123, 58, 237, 0.1);
+  color: $color-primary-light;
+}

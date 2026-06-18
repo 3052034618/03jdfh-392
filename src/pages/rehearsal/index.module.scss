@@ -1,0 +1,423 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background: $color-bg-page;
+  padding: $spacing-lg $page-padding 120rpx;
+}
+
+.header {
+  margin-bottom: $spacing-lg;
+}
+
+.progressBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+}
+
+.stepIndicator {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.stepChip {
+  padding: 8rpx 24rpx;
+  background: rgba(123, 58, 237, 0.15);
+  color: $color-primary-light;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  border-radius: $radius-button;
+  border: 2rpx solid rgba(123, 58, 237, 0.3);
+}
+
+.totalText {
+  font-size: $font-size-xs;
+  color: $color-text-tertiary;
+}
+
+.pathDots {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: $radius-round;
+  background: $color-bg-hover;
+  border: 2rpx solid $color-border;
+  transition: all $transition-base;
+}
+
+.passed {
+  background: $color-primary;
+  border-color: $color-primary;
+}
+
+.current {
+  background: $emotion-scream;
+  border-color: $emotion-scream;
+  box-shadow: 0 0 12rpx $glow-danger;
+  width: 16rpx;
+  height: 16rpx;
+}
+
+.navBtn {
+  @include button-reset;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: $radius-round;
+  background: $color-bg-card;
+  border: 2rpx solid $color-border;
+  color: $color-text-secondary;
+  font-size: 36rpx;
+  font-weight: $font-weight-bold;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.92);
+    border-color: $color-primary;
+    color: $color-primary-light;
+  }
+
+  &.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+}
+
+.previousBlock {
+  background: rgba(59, 167, 255, 0.06);
+  border-left: 6rpx solid $emotion-whisper;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.prevLabel {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  font-size: 20rpx;
+  color: $emotion-whisper;
+  font-weight: $font-weight-medium;
+  margin-bottom: $spacing-xs;
+}
+
+.prevMeta {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-sm;
+}
+
+.prevName {
+  font-size: 24rpx;
+  color: $color-text-secondary;
+  font-weight: $font-weight-medium;
+}
+
+.prevText {
+  font-size: 26rpx;
+  color: $color-text-primary;
+  line-height: 1.7;
+  font-style: italic;
+  opacity: 0.9;
+}
+
+.prevTag {
+  margin-top: $spacing-sm;
+}
+
+.currentCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  border: 2rpx solid $color-primary;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  box-shadow: 0 0 32rpx rgba(123, 58, 237, 0.25);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4rpx;
+    background: linear-gradient(90deg, $emotion-whisper 0%, $color-primary 50%, $emotion-scream 100%);
+  }
+}
+
+.currentHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.currentRole {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.roleAvatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: $color-text-white;
+  font-size: 28rpx;
+  font-weight: $font-weight-bold;
+  border: 3rpx solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+}
+
+.roleName {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.nodeBadge {
+  padding: 6rpx 20rpx;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  color: $color-text-white;
+  font-size: 20rpx;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-button;
+}
+
+.currentText {
+  font-size: 32rpx;
+  color: $color-text-primary;
+  line-height: 1.8;
+  padding: $spacing-lg;
+  background: rgba(123, 58, 237, 0.06);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-md;
+  border: 2rpx solid rgba(123, 58, 237, 0.12);
+}
+
+.currentFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.intensityBox {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.intensityLabel {
+  font-size: 22rpx;
+  color: $color-text-tertiary;
+}
+
+.intensityBar {
+  width: 160rpx;
+  height: 12rpx;
+  background: $color-bg-hover;
+  border-radius: $radius-round;
+  overflow: hidden;
+}
+
+.intensityFill {
+  height: 100%;
+  border-radius: $radius-round;
+  background: linear-gradient(90deg, $emotion-normal, $color-primary, $emotion-scream);
+}
+
+.intensityNum {
+  font-size: 24rpx;
+  color: $color-text-primary;
+  font-weight: $font-weight-bold;
+  min-width: 48rpx;
+}
+
+.annotationsTip {
+  padding: $spacing-md;
+  background: rgba(255, 200, 87, 0.06);
+  border: 2rpx solid rgba(255, 200, 87, 0.2);
+  border-radius: $radius-md;
+  margin-bottom: $spacing-lg;
+}
+
+.annTitle {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  font-size: 22rpx;
+  color: $emotion-close;
+  font-weight: $font-weight-semibold;
+  margin-bottom: $spacing-xs;
+}
+
+.annContent {
+  font-size: 24rpx;
+  color: $color-text-secondary;
+  line-height: 1.65;
+  padding-left: 28rpx;
+}
+
+.choicesBlock {
+  margin-bottom: $spacing-lg;
+}
+
+.choicesHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.choicesTitle {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.choicesSub {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+}
+
+.choiceCard {
+  background: $color-bg-card;
+  border-radius: $radius-md;
+  border: 2rpx solid $color-border;
+  padding: $spacing-md $spacing-lg;
+  margin-bottom: $spacing-sm;
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.995);
+    border-color: $color-primary;
+    background: rgba(123, 58, 237, 0.08);
+  }
+}
+
+.choiceLetter {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-md;
+  background: rgba(123, 58, 237, 0.15);
+  color: $color-primary-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: $font-size-md;
+  font-weight: $font-weight-bold;
+  flex-shrink: 0;
+}
+
+.choiceBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.choiceMain {
+  font-size: 26rpx;
+  color: $color-text-primary;
+  line-height: 1.55;
+}
+
+.choiceHint {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+}
+
+.choiceArrow {
+  font-size: 28rpx;
+  color: $color-primary-light;
+  flex-shrink: 0;
+}
+
+.resetRow {
+  display: flex;
+  gap: $spacing-sm;
+  margin-bottom: $spacing-lg;
+}
+
+.resetBtn {
+  @include button-reset;
+  flex: 1;
+  height: 80rpx;
+  border-radius: $radius-button;
+  background: transparent;
+  border: 2rpx solid $color-border;
+  color: $color-text-tertiary;
+  font-size: $font-size-sm;
+  transition: all $transition-base;
+
+  &:active {
+    border-color: $color-primary;
+    color: $color-primary-light;
+  }
+}
+
+.primaryReset {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  border: none;
+  color: $color-text-white;
+  box-shadow: 0 4rpx 16rpx rgba(123, 58, 237, 0.3);
+}
+
+.emptyCard {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  border: 2rpx dashed $color-border;
+  padding: $spacing-xl * 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-md;
+  text-align: center;
+}
+
+.emptyIcon {
+  font-size: 80rpx;
+  opacity: 0.4;
+}
+
+.emptyTitle {
+  font-size: $font-size-lg;
+  color: $color-text-secondary;
+  font-weight: $font-weight-semibold;
+}
+
+.emptyText {
+  font-size: 24rpx;
+  color: $color-text-tertiary;
+  line-height: 1.6;
+}
+
+.emptyBtn {
+  @include button-reset;
+  height: 80rpx;
+  padding: 0 $spacing-xl;
+  border-radius: $radius-button;
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-medium;
+  box-shadow: 0 4rpx 16rpx rgba(123, 58, 237, 0.3);
+  margin-top: $spacing-sm;
+}

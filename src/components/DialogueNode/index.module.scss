@@ -1,0 +1,164 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  border: 2rpx solid $color-border;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.995);
+    border-color: rgba(123, 58, 237, 0.4);
+  }
+}
+
+.active {
+  border-color: $color-primary;
+  box-shadow: 0 0 24rpx rgba(123, 58, 237, 0.35);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-md;
+}
+
+.role {
+  display: flex;
+  align-items: center;
+  gap: $spacing-sm;
+}
+
+.avatar {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-round;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  color: $color-text-white;
+  font-weight: $font-weight-semibold;
+  border: 3rpx solid rgba(255, 255, 255, 0.1);
+}
+
+.nameBox {
+  display: flex;
+  flex-direction: column;
+}
+
+.name {
+  font-size: $font-size-md;
+  color: $color-text-primary;
+  font-weight: $font-weight-semibold;
+}
+
+.nodeId {
+  font-size: 20rpx;
+  color: $color-text-tertiary;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: $spacing-xs;
+}
+
+.recordedBadge {
+  padding: 4rpx 16rpx;
+  background: rgba(47, 212, 166, 0.12);
+  color: #2FD4A6;
+  font-size: 20rpx;
+  border-radius: $radius-round;
+  border: 2rpx solid rgba(47, 212, 166, 0.3);
+}
+
+.pendingBadge {
+  padding: 4rpx 16rpx;
+  background: rgba(158, 158, 176, 0.12);
+  color: $color-text-tertiary;
+  font-size: 20rpx;
+  border-radius: $radius-round;
+  border: 2rpx solid $color-border;
+}
+
+.text {
+  font-size: 28rpx;
+  color: $color-text-primary;
+  line-height: 1.75;
+  margin-bottom: $spacing-md;
+  padding: $spacing-md;
+  background: rgba(123, 58, 237, 0.05);
+  border-radius: $radius-md;
+  border-left: 6rpx solid $color-primary;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+}
+
+.choices {
+  margin-top: $spacing-md;
+  padding-top: $spacing-md;
+  border-top: 2rpx dashed $color-border;
+}
+
+.choicesTitle {
+  font-size: 22rpx;
+  color: $color-text-tertiary;
+  margin-bottom: $spacing-sm;
+}
+
+.choiceItem {
+  display: flex;
+  align-items: flex-start;
+  gap: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: $color-bg-hover;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-xs;
+  border: 2rpx solid transparent;
+  transition: all $transition-fast;
+
+  &:active {
+    border-color: rgba(123, 58, 237, 0.3);
+    background: rgba(123, 58, 237, 0.08);
+  }
+}
+
+.choiceLabel {
+  font-size: 20rpx;
+  color: $color-primary-light;
+  font-weight: $font-weight-semibold;
+  min-width: 36rpx;
+  padding-top: 2rpx;
+}
+
+.choiceText {
+  flex: 1;
+  font-size: 24rpx;
+  color: $color-text-secondary;
+  line-height: 1.5;
+}
+
+.choiceArrow {
+  font-size: 22rpx;
+  color: $color-text-tertiary;
+  padding-top: 2rpx;
+}
+
+.annotationCount {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  font-size: 22rpx;
+  color: $emotion-close;
+}

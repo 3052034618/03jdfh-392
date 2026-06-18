@@ -1,0 +1,43 @@
+// ============================================
+// 主题配色变量 - 恐怖配音工具（暗色心理恐怖风格）
+// ============================================
+
+// 品牌主题色：神秘紫
+$color-primary: #7B3AED;
+$color-primary-light: #9D6BFF;
+$color-primary-dark: #5A23C2;
+
+// 情绪标签色（表演提示专用）
+$emotion-normal: #2FD4A6;   // 假装正常 - 阴森绿
+$emotion-whisper: #3BA7FF;  // 压低声音 - 幽深蓝
+$emotion-close: #FFC857;    // 突然亲近 - 诡异黄
+$emotion-mimic: #C874FF;    // 模仿别人 - 迷雾紫
+$emotion-scream: #FF3B5C;   // 尖叫爆发 - 危险红
+
+// 功能色
+$color-success: #2FD4A6;
+$color-warning: #FFC857;
+$color-error: #FF3B5C;
+$color-info: #3BA7FF;
+
+// 背景色（暗色模式）
+$color-bg-page: #0D0D14;
+$color-bg-card: #1A1A24;
+$color-bg-hover: #262636;
+$color-bg-input: #262636;
+$color-bg-tag: rgba(123, 58, 237, 0.12);
+
+// 文本色
+$color-text-primary: #E8E8F0;
+$color-text-secondary: #9E9EB0;
+$color-text-tertiary: #6E6E8A;
+$color-text-disabled: #4A4A5E;
+$color-text-white: #FFFFFF;
+
+// 边框色
+$color-border: #2E2E40;
+$color-divider: #1E1E2C;
+
+// 发光色
+$glow-primary: rgba(123, 58, 237, 0.4);
+$glow-danger: rgba(255, 59, 92, 0.3);

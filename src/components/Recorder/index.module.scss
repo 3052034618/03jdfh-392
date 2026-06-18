@@ -1,0 +1,147 @@
+@use '@/styles/variables.scss' as *;
+
+.wrapper {
+  width: 100%;
+  background: $color-bg-card;
+  border-radius: $radius-lg;
+  border: 2rpx solid $color-border;
+  padding: $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-md;
+}
+
+.statusText {
+  font-size: $font-size-sm;
+  color: $color-text-secondary;
+}
+
+.timer {
+  font-size: 56rpx;
+  font-weight: $font-weight-bold;
+  color: $color-text-primary;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 2rpx;
+}
+
+.danger {
+  color: $emotion-scream;
+  text-shadow: 0 0 20rpx rgba(255, 59, 92, 0.5);
+}
+
+.visualizer {
+  width: 100%;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  margin: $spacing-sm 0;
+}
+
+.bar {
+  width: 8rpx;
+  background: linear-gradient(180deg, $color-primary-light 0%, $emotion-scream 100%);
+  border-radius: 4rpx;
+  transition: height $transition-fast;
+}
+
+.buttonRow {
+  display: flex;
+  gap: $spacing-md;
+  margin-top: $spacing-sm;
+}
+
+.mainBtn {
+  @include button-reset;
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: $radius-round;
+  background: linear-gradient(135deg, $emotion-scream 0%, $color-primary-dark 100%);
+  box-shadow: 0 8rpx 32rpx rgba(255, 59, 92, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6rpx;
+  color: $color-text-white;
+  font-size: $font-size-sm;
+  font-weight: $font-weight-semibold;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.92);
+    box-shadow: 0 4rpx 16rpx rgba(255, 59, 92, 0.5);
+  }
+}
+
+.innerCircle {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: $radius-md;
+  background: $color-text-white;
+  transition: all $transition-base;
+}
+
+.recording {
+  border-radius: 8rpx;
+  width: 48rpx;
+  height: 48rpx;
+  background: $color-text-white;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(0.9); }
+}
+
+.subBtn {
+  @include button-reset;
+  height: 96rpx;
+  padding: 0 $spacing-xl;
+  border-radius: $radius-button;
+  background: $color-bg-hover;
+  border: 2rpx solid $color-border;
+  color: $color-text-secondary;
+  font-size: $font-size-md;
+  font-weight: $font-weight-medium;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.85;
+    transform: scale(0.98);
+    background: rgba(123, 58, 237, 0.08);
+    color: $color-primary-light;
+  }
+}
+
+.primary {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-dark 100%);
+  border: none;
+  color: $color-text-white;
+  box-shadow: 0 4rpx 16rpx rgba(123, 58, 237, 0.3);
+}
+
+.tips {
+  width: 100%;
+  padding: $spacing-md;
+  background: rgba(123, 58, 237, 0.06);
+  border-radius: $radius-md;
+  border-left: 6rpx solid $color-primary;
+  margin-top: $spacing-sm;
+}
+
+.tipsTitle {
+  font-size: 22rpx;
+  color: $color-primary-light;
+  font-weight: $font-weight-semibold;
+  margin-bottom: 6rpx;
+}
+
+.tipsText {
+  font-size: 22rpx;
+  color: $color-text-tertiary;
+  line-height: 1.6;
+}
